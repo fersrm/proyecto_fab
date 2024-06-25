@@ -1,0 +1,24 @@
+{% extends "pages/Layout/base_pages.html" %}
+{% load tailwind_filters %}
+
+{% block head_title %}
+  Editar NNA
+{% endblock head_title %}
+
+{% block content_pages %}
+
+  <h1 class="max-w-2xl font-bold tracking-tight text-gray-900 text-2xl mb-4">Editar</h1>
+  <form method="POST">
+      {% csrf_token %}
+      {{ person_form|crispy }}
+      {{ nna_form|crispy }}
+
+      {% include "components/btn/button.html" with button_text="Guardar" %}
+
+      <a href="{% url 'ReportList' %}" class="flex w-full justify-center rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 mt-5">
+        Cancelar
+      </a> 
+
+  </form>
+
+{% endblock content_main %}

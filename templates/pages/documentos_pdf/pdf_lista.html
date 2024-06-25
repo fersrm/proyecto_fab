@@ -1,0 +1,146 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+
+{% block head_title %}
+  Documentos
+{% endblock head_title %}
+
+
+{% block content_main %}
+
+  {% if user.profile.position_FK.id and user.profile.position_FK.id != 3  %}
+    <div x-data="{ modelOpen: false }" id="addModal">
+      <button @click="modelOpen =!modelOpen" class="flex items-center justify-center px-3 py-2 space-x-2 text-sm tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-500 rounded-md dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:bg-indigo-700 hover:bg-indigo-600 focus:outline-none focus:bg-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 mb-5" id="openModalButton"  onclick="abrir_modal_pdf('{% url 'PdfAdd' %}')">
+        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+        </svg>
+        <span>Agregar Documento</span>
+      </button>
+      {% include "components/modal/modal.html" %}
+    </div>
+  {% endif %}
+
+  {% if object_list %}
+
+      <div class="overflow-auto"> 
+      <table aria-labelledby="tablaDocumentosPdf" aria-describedby="tablaDocumentosPdf" class="w-full whitespace-nowrap text-left">
+        <colgroup>
+          <col class="w-full sm:w-4/12">
+          <col class="lg:w-4/12">
+          <col class="lg:w-2/12">
+          <col class="lg:w-1/12">
+          <col class="lg:w-1/12">
+        </colgroup>
+        <thead class="border-b border-white/10 text-sm leading-6 text-white">
+          <tr>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Documentos</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Subido</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Ver Archivo</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Descargar</th>
+            {% if user.profile.position_FK.id and user.profile.position_FK.id != 3  %}
+              <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Estado</th>
+              <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Eliminar</th>
+              <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Cambiar Estado</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+
+        {% for item in object_list %}
+  
+          <tr>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.pdf.name }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.user_FK }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              <a href="{{ item.pdf.url }}" target="_blank" rel="noopener" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
+                {% include "components/svg/svg_ver.html" %}
+              </a>
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              <a href="{{ item.pdf.url }}" download class="flex w-12 justify-center rounded-md bg-orange-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400 ">
+                {% include "components/svg/svg_descargar.html" %}
+              </a>
+            </td>
+        
+            {% if user.profile.position_FK.id and user.profile.position_FK.id != 3  %}
+
+              <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+                {% if item.state %}
+                  <span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                    Activado
+                  </span>
+                {% else %}
+                  <span class="inline-flex flex-shrink-0 items-center rounded-full bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-green-600/20">
+                    Desativado
+                  </span> 
+                {% endif %}
+              </td>
+              
+                <td class="py-1 pl-0  text-sm leading-6  md:table-cell">
+                  <a href="{% url "PdfDelete" item.id %}" onclick="return confirm('¿Estás seguro de que deseas borrar {{ item.pdf.name }} ?');" class="flex w-12 justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ">
+                    {% include "components/svg/svg_eliminar.html" %}
+                  </a>
+              </td>
+
+              <td class="py-1 pl-0  text-sm leading-6  md:table-cell">
+                <button onclick="changeState({{ item.id }}, '{{ item.pdf.name }}'); return false;" class="flex w-12 justify-center rounded-md bg-emerald-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 ">
+                  {% include "components/svg/svg_estado.html" %}
+                </button>
+              </td>
+              
+            {% endif %}
+  
+          </tr>
+      
+        {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+    
+  {% else %}
+
+    <strong>NO HAY REGISTROS AUTORIZADOS</strong>
+
+  {% endif %} 
+
+  {% include 'components/mensajes.html' %}  
+
+{% endblock content_main %}
+
+{% block javascript %}
+  
+  <script defer src="{% static 'js/carga_documento.js' %}"></script>
+
+  <script>
+    function changeState(itemId, itemName) {
+      if (!confirm('¿Estás seguro de que deseas cambien el estado de ' + itemName + '?')) {
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+      formData.append('item_id', itemId);
+
+      fetch("{% url 'PdfEdit' %}", {
+        method: 'POST',
+        body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+        
+        location.reload()
+        
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un error al cambiar el estado.');
+      });
+    }
+  </script>
+
+{% endblock javascript %}

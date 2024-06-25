@@ -1,0 +1,37 @@
+{% load static %} 
+{% load static tailwind_tags %}
+
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block head_title %} {% endblock head_title %}</title>
+    <link rel="icon" href="{% static 'favicon/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'favicon/favicon.png' %}" type="image/png">
+    <link rel="icon" sizes="32x32" href="{% static 'favicon/favicon-32x32.png' %}" type="image/png">
+    <link rel="icon" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}"  type="image/png">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-touch-icon.png' %}">
+    <link rel="manifest" href="{% static 'favicon/site.webmanifest' %}">
+    <meta property="og:title" content="Mejor Ñinez">
+    <meta property="og:site_name" content="Proyecto Mejor Ñinez">
+    <meta property="og:url" content="https://bknm0bzd-8000.brs.devtunnels.ms/">
+    <meta property="og:description" content="Prototipo">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{% static "img/logo.png" %}">
+    {% tailwind_css %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/mensajes.css' %}">
+    <link rel="stylesheet" href="{% static 'css/spiner.css' %}">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" integrity="sha384-l8f0VcPi/M1iHPv8egOnY/15TDwqgbOR1anMIJWvU6nLRgZVLTLSaNqi/TOoT5Fh" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js" integrity="sha512-JatFEe90fJU2nrgf27fUz2hWRvdYrSlTEV8esFuqCtfiqWN8phkS1fUl/xCfYyrLDQcNf3YyS0V9hG7U4RHNmQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script defer src="{% static "js/mensajes.js" %}"></script>
+    <script defer src="{% static "js/modal.js" %}"></script>
+    {% block javascript %} {% endblock javascript %}
+  </head>
+  <body class="bg-gray-900/90 min-h-dvh">
+    
+    {% block content %} {% endblock content %}
+    
+  </body>
+</html>
