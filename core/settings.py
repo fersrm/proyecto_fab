@@ -54,11 +54,9 @@ INSTALLED_APPS = DEFAULT_DJANGO_APPS + LOCAL_APPS + THIRD_APPS
 
 TAILWIND_APP_NAME = "theme"
 
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
+INTERNAL_IPS = env.list("INTERNAL_IPS", default=[])
 
-NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
+NPM_BIN_PATH = os.environ.get("NPM_BIN_PATH")
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 
@@ -214,7 +212,3 @@ AXES_COOLOFF_TIME = delta
 AXES_RESET_ON_SUCCESS = True
 AXES_ENABLE_ACCESS_FAILURE_LOG = True
 AXES_LOCK_OUT_AT_FAILURE = True
-
-################# SOLO POR DESARROLLO ######################
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 6000
-############################################################
