@@ -41,6 +41,7 @@ from utils.helpers import (
 )
 from django.db import transaction
 from adapters.excel_adapter import ExcelAdapter
+from concurrent.futures import ThreadPoolExecutor
 
 # Create your views here.
 
@@ -82,20 +83,25 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
         self.legals = {l.proceedings: l for l in Legal.objects.all()}
 
     def process_dataframe(self, df, user):
-        for _, row in df.iterrows():
-            adapter = ExcelAdapter(row)
-            institution = self.get_or_create_institution(adapter)
-            project = self.get_or_create_project(adapter, institution)
-            person = self.get_or_create_person(adapter)
-            location = self.get_or_create_location(adapter)
-            solicitor = self.get_or_create_solicitor(adapter)
-            legal_quality = self.get_or_create_legal_quality(adapter)
-            tribunal = self.get_or_create_tribunal(adapter)
-            legal = self.get_or_create_legal(adapter, legal_quality, tribunal)
-            nna = self.get_or_create_nna(
-                adapter, person, location, solicitor, legal, user
-            )
-            self.create_or_update_entry(adapter, nna, project)
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            futures = [
+                executor.submit(self.process_row, row, user) for _, row in df.iterrows()
+            ]
+            for future in futures:
+                future.result()
+
+    def process_row(self, row, user):
+        adapter = ExcelAdapter(row)
+        institution = self.get_or_create_institution(adapter)
+        project = self.get_or_create_project(adapter, institution)
+        person = self.get_or_create_person(adapter)
+        location = self.get_or_create_location(adapter)
+        solicitor = self.get_or_create_solicitor(adapter)
+        legal_quality = self.get_or_create_legal_quality(adapter)
+        tribunal = self.get_or_create_tribunal(adapter)
+        legal = self.get_or_create_legal(adapter, legal_quality, tribunal)
+        nna = self.get_or_create_nna(adapter, person, location, solicitor, legal, user)
+        self.create_or_update_entry(adapter, nna, project)
 
     def get_or_create_institution(self, adapter):
         institution_name = adapter.get_institution_name()
