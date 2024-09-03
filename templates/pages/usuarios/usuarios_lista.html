@@ -3,9 +3,8 @@
 
 {% block content_main %} 
 
-  <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
-    {% if user %}
+{% if users %}
+    <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
       {% for user, verifition in verification_users %}
       
@@ -52,13 +51,12 @@
         </li>
         
       {% endfor %}
-    
-    {% else %}
 
-      <strong>NO HAY REGISTROS</strong>
+    </ul>  
+  {% else %}
+
+    <strong>NO HAY REGISTROS</strong>
       
-    {% endif %}
-
-  </ul>
+  {% endif %}
 
 {% endblock content_main %}

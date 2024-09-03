@@ -11,10 +11,10 @@ class ReportForm(forms.Form):
         if not document.name.endswith((".xlsx",)):
             raise forms.ValidationError("El archivo debe ser de formato Excel (xlsx)")
 
-        max_size = 5 * 1024 * 1024
+        max_size = 50 * 1024 * 1024
         if document.size > max_size:
             raise forms.ValidationError(
-                "El tamaño del archivo no puede ser mayor a 5 megabytes."
+                "El tamaño del archivo no puede ser mayor a 50 megabytes."
             )
 
         return document

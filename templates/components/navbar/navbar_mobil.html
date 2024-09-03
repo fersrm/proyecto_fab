@@ -16,7 +16,7 @@
                 Dashboard
               </a>
             </li>
-            {% if user.profile.position_FK.id and user.profile.position_FK.id != 3  %}
+            {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
               <li>
                 <a href="{% url 'Register' %}" class="group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/registro/' %} bg-gray-800 text-white {% else %} text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
                   <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -15,7 +15,7 @@ class PermitsPositionMixin:
         if user.is_superuser or (
             hasattr(user, "profile")
             and getattr(user.profile, "position_FK", None)
-            and user.profile.position_FK.id != 3
+            and user.profile.position_FK.permission_code != "RESTRICTED"
         ):
             return super().dispatch(request, *args, **kwargs)
         return redirect(self.redirect_url)

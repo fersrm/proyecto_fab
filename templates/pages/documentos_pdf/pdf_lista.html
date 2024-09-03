@@ -8,7 +8,8 @@
 
 {% block content_main %}
 
-  {% if user.profile.position_FK.id and user.profile.position_FK.id != 3  %}
+
+  {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
     <div x-data="{ modelOpen: false }" id="addModal">
       <button @click="modelOpen =!modelOpen" class="flex items-center justify-center px-3 py-2 space-x-2 text-sm tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-500 rounded-md dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:bg-indigo-700 hover:bg-indigo-600 focus:outline-none focus:bg-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 mb-5" id="openModalButton"  onclick="abrir_modal_pdf('{% url 'PdfAdd' %}')">
         <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
@@ -37,7 +38,7 @@
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Subido</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Ver Archivo</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Descargar</th>
-            {% if user.profile.position_FK.id and user.profile.position_FK.id != 3  %}
+            {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
               <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Estado</th>
               <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Eliminar</th>
               <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Cambiar Estado</th>
@@ -66,7 +67,7 @@
               </a>
             </td>
         
-            {% if user.profile.position_FK.id and user.profile.position_FK.id != 3  %}
+            {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
 
               <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
                 {% if item.state %}

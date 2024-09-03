@@ -76,17 +76,13 @@
 
                 <div class="flex items-center justify-end gap-x-2 sm:justify-start">
                   <div class="hidden text-white sm:block">
-                    {% if user.is_superuser %}
+                    {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
                       <span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                        Super Usuario
-                      </span>
-                    {% elif user.is_staff %}
-                      <span class="inline-flex flex-shrink-0 items-center rounded-full bg-indigo-50 px-1.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-green-600/20">
-                        Staff
+                        {{ user.profile.position_FK.user_position }}
                       </span>
                     {% else %}
                       <span class="inline-flex flex-shrink-0 items-center rounded-full bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-green-600/20">
-                        Usuario
+                          {{ user.profile.position_FK.user_position }}
                       </span> 
                     {% endif %}
                   </div>

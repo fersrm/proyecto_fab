@@ -1,4 +1,5 @@
 from django.db import models
+from .choices import PERMISOS
 
 # Create your models here.
 
@@ -22,6 +23,9 @@ def profile_picture_path(instance, filename):
 # Create your models here.
 class Position(models.Model):
     user_position = models.CharField(max_length=45, unique=True)
+    permission_code = models.CharField(
+        max_length=25, choices=PERMISOS, default="RESTRICTED"
+    )
 
     class Meta:
         db_table = "position"
