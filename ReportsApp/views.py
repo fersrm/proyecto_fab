@@ -60,7 +60,11 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
 
             with transaction.atomic():
                 self.load_existing_data()
-                self.process_dataframe(df, user)
+                error_list = self.process_dataframe(df, user)
+
+            if error_list:
+                for error in error_list:
+                    messages.error(self.request, error, extra_tags="excel_error")
 
             messages.success(self.request, "Documento Cargado")
             return redirect("ReportList")
@@ -83,25 +87,49 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
         self.legals = {l.proceedings: l for l in Legal.objects.all()}
 
     def process_dataframe(self, df, user):
+        error_list = []
         with ThreadPoolExecutor(max_workers=6) as executor:
             futures = [
-                executor.submit(self.process_row, row, user) for _, row in df.iterrows()
+                executor.submit(self.process_row, index, row, user, error_list)
+                for index, row in df.iterrows()
             ]
             for future in futures:
                 future.result()
+        return error_list
 
-    def process_row(self, row, user):
-        adapter = ExcelAdapter(row)
-        institution = self.get_or_create_institution(adapter)
-        project = self.get_or_create_project(adapter, institution)
-        person = self.get_or_create_person(adapter)
-        location = self.get_or_create_location(adapter)
-        solicitor = self.get_or_create_solicitor(adapter)
-        legal_quality = self.get_or_create_legal_quality(adapter)
-        tribunal = self.get_or_create_tribunal(adapter)
-        legal = self.get_or_create_legal(adapter, legal_quality, tribunal)
-        nna = self.get_or_create_nna(adapter, person, location, solicitor, legal, user)
-        self.create_or_update_entry(adapter, nna, project)
+    def process_row(self, index, row, user, error_list):
+        try:
+            adapter = ExcelAdapter(row)
+            institution = self.get_or_create_institution(adapter)
+            project = self.get_or_create_project(adapter, institution)
+            person = self.get_or_create_person(adapter)
+            location = self.get_or_create_location(adapter)
+            solicitor = self.get_or_create_solicitor(adapter)
+            legal_quality = self.get_or_create_legal_quality(adapter)
+            tribunal = self.get_or_create_tribunal(adapter)
+            legal = self.get_or_create_legal(adapter, legal_quality, tribunal)
+            nna = self.get_or_create_nna(
+                adapter, person, location, solicitor, legal, user
+            )
+            self.create_or_update_entry(adapter, nna, project)
+        except Exception as e:
+            cod_nna = adapter.get_cod_nna()
+            if "valor nulo en la columna" in str(e):
+                error_message = (
+                    f"Error en la fila {index + 2}: El código NNA {cod_nna} no se pudo procesar porque falta un dato requerido en la columna. "
+                    f"Por favor, revisa que todos los valores estén completos, o que no este duplicado el 'código NNA'"
+                )
+            elif "llave duplicada viola restricción de unicidad" in str(e):
+                error_message = (
+                    f"Error en la fila {index + 2}: El código NNA {cod_nna} no se pudo procesar porque la persona ya está registrada con otro código. "
+                    f"Verifica que no se esté ingresando información duplicada."
+                )
+            else:
+                error_message = (
+                    f"Error en la fila {index + 2} con el código NNA {cod_nna}: {str(e)}. "
+                    f"Por favor, revisa la fila y corrige el error."
+                )
+            error_list.append(error_message)
 
     def get_or_create_institution(self, adapter):
         institution_name = adapter.get_institution_name()
@@ -125,15 +153,13 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
     def get_or_create_person(self, adapter):
         rut = adapter.get_rut()
         if rut not in self.persons:
-            sex = adapter.get_sex()
-            birthdate = adapter.get_birthdate()
             self.persons[rut] = Person.objects.create(
                 rut=rut,
                 name=adapter.get_name(),
                 last_name_paternal=adapter.get_last_name_paternal(),
                 last_name_maternal=adapter.get_last_name_maternal(),
-                birthdate=birthdate,
-                sex=sex,
+                birthdate=adapter.get_birthdate(),
+                sex=adapter.get_sex(),
                 address=adapter.get_address(),
                 nationality=adapter.get_nationality(),
             )
@@ -186,15 +212,19 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
     def get_or_create_nna(self, adapter, person, location, solicitor, legal, user):
         attention = adapter.get_attention()
         cod_nna = adapter.get_cod_nna()
+
         if cod_nna in self.existing_nn_as:
             nna = self.existing_nn_as[cod_nna]
-            nna.type_of_attention = attention
-            nna.person_FK = person
-            nna.location_FK = location
-            nna.solicitor_FK = solicitor
-            nna.legal_FK = legal
-            nna.user_FK = user
-            nna.save()
+            if nna.person_FK.rut == person.rut:
+                nna.type_of_attention = attention
+                nna.person_FK = person
+                nna.location_FK = location
+                nna.solicitor_FK = solicitor
+                nna.legal_FK = legal
+                nna.user_FK = user
+                nna.save()
+            else:
+                return None
         else:
             nna = NNA.objects.create(
                 cod_nna=cod_nna,

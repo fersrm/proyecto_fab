@@ -71,7 +71,7 @@ class Legal(models.Model):
 class NNA(models.Model):
     cod_nna = models.IntegerField(unique=True)
     type_of_attention = models.BooleanField(default=True)
-    person_FK = models.ForeignKey(Person, on_delete=models.CASCADE)
+    person_FK = models.OneToOneField(Person, on_delete=models.CASCADE)
     location_FK = models.ForeignKey(Location, on_delete=models.CASCADE)
     solicitor_FK = models.ForeignKey(Solicitor, on_delete=models.CASCADE)
     legal_FK = models.ForeignKey(Legal, on_delete=models.CASCADE)
@@ -80,6 +80,11 @@ class NNA(models.Model):
 
     def __str__(self):
         return str(self.person_FK.name)
+
+    def delete(self, *args, **kwargs):
+        if self.person_FK:
+            self.person_FK.delete()
+        super().delete(*args, **kwargs)
 
 
 class Project(models.Model):

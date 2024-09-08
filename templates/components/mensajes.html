@@ -13,7 +13,7 @@
       ];
 
       messages.forEach(function(message) {
-        if (message.tags.includes('error')) {
+        if (message.tags.includes('error') && !message.tags.includes('excel_error')) {
           error(message.text);
         } else if (message.tags.includes('success') && !message.text.includes('Ha cerrado sesión') && !message.text.includes('Ha iniciado sesión exitosamente')) {
           success(message.text);
