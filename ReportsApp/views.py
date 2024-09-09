@@ -117,7 +117,7 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
             if "valor nulo en la columna" in str(e):
                 error_message = (
                     f"Error en la fila {index + 2}: El código NNA {cod_nna} no se pudo procesar porque falta un dato requerido en la columna. "
-                    f"Por favor, revisa que todos los valores estén completos, o que no este duplicado el 'código NNA'"
+                    f"Por favor, revisa que todos los valores estén completos, o que no este duplicado el código NNA"
                 )
             elif "llave duplicada viola restricción de unicidad" in str(e):
                 error_message = (
