@@ -1,14 +1,11 @@
-from django.views.generic import View, ListView, CreateView, DeleteView
-from .forms import DocumentPdfCreateForm
+from django.views.generic import ListView, CreateView, DeleteView, UpdateView
+from .forms import DocumentPdfCreateForm, DocumentPdfUpdateForm
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
 from .models import DocumentPDF
 from core.mixins import PermitsPositionMixin
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 
 # Create your views here.
 
@@ -60,15 +57,23 @@ class DocumentPdfDeleteView(LoginRequiredMixin, PermitsPositionMixin, DeleteView
         return redirect(self.get_success_url())
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class DocumentPdfUpdateView(LoginRequiredMixin, PermitsPositionMixin, View):
-    def post(self, request, *args, **kwargs):
-        item_id = request.POST.get("item_id")
-        try:
-            item = DocumentPDF.objects.get(id=item_id)
-            item.state = not item.state
-            item.save()
-            messages.success(request, "Estado actualizado correctamente")
-            return JsonResponse({"success": True})
-        except DocumentPDF.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Documento no encontrado"})
+class DocumentPdfUpdateView(LoginRequiredMixin, PermitsPositionMixin, UpdateView):
+    model = DocumentPDF
+    form_class = DocumentPdfUpdateForm
+    template_name = "pages/documentos_pdf/editar_pdf.html"
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, "Pdf editado correctamente")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Error en el formulario")
+        for field, errors in form.errors.items():
+            for error in errors:
+                print(field, error)
+                messages.error(self.request, f"{error}")
+        return redirect("PdfEdit")
+
+    def get_success_url(self):
+        return reverse_lazy("PdfList")

@@ -8,7 +8,6 @@
 
 {% block content_main %}
 
-
   <div x-data="{ modelOpen: false }" id="addModal">
     <button @click="modelOpen =!modelOpen" class="flex items-center justify-center px-3 py-2 space-x-2 text-sm tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-500 rounded-md dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:bg-indigo-700 hover:bg-indigo-600 focus:outline-none focus:bg-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 mb-5" id="openModalButton"  onclick="abrir_modal_pdf('{% url 'PdfAdd' %}')">
       <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
@@ -55,12 +54,12 @@
               {{ item.user_FK }}
             </td>
             <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
-              <a href="{{ item.pdf.url }}" target="_blank" rel="noopener" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
+              <a href="{{ item.pdf.url }}" target="_blank" rel="noopener" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
                 {% include "components/svg/svg_ver.html" %}
               </a>
             </td>
             <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
-              <a href="{{ item.pdf.url }}" download class="flex w-12 justify-center rounded-md bg-orange-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400 ">
+              <a href="{{ item.pdf.url }}" download class="flex w-12 justify-center rounded-md bg-orange-300 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400 ">
                 {% include "components/svg/svg_descargar.html" %}
               </a>
             </td>
@@ -80,15 +79,19 @@
               </td>
               
                 <td class="py-1 pl-0  text-sm leading-6  md:table-cell">
-                  <a href="{% url "PdfDelete" item.id %}" onclick="return confirm('¿Estás seguro de que deseas borrar {{ item.pdf.name }} ?');" class="flex w-12 justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ">
+                  <a href="{% url "PdfDelete" item.id %}" onclick="return confirm('¿Estás seguro de que deseas borrar {{ item.pdf.name }} ?');" class="flex w-12 justify-center rounded-md bg-red-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ">
                     {% include "components/svg/svg_eliminar.html" %}
                   </a>
               </td>
 
-              <td class="py-1 pl-0  text-sm leading-6  md:table-cell">
-                <button onclick="changeState({{ item.id }}, '{{ item.pdf.name }}'); return false;" class="flex w-12 justify-center rounded-md bg-emerald-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 ">
-                  {% include "components/svg/svg_estado.html" %}
-                </button>
+              <td class="py-1 pl-0 text-sm leading-6 md:table-cell">
+                <div x-data="{ modelOpen: false }">
+                  <button @click="modelOpen =!modelOpen" class="flex items-center justify-center px-3 space-x-2 text-sm tracking-wide text-white capitalize transition-colors duration-200 transform bg-emerald-600 rounded-md dark:bg-emerald-600  hover:bg-emerald-500 focus:outline-none focus:bg-emerald-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50" 
+                    onclick="abrir_modal_pdf_edit('{% url 'PdfEdit' item.id %}', {{ item.id }});">
+                    {% include "components/svg/svg_estado.html" %}
+                  </button>
+                  {% include "components/modal/modal_form.html" with id_modal=item.id %}
+                </div>
               </td>
               
             {% endif %}
@@ -102,9 +105,7 @@
     </div>
     
   {% else %}
-
     <strong>NO HAY REGISTROS AUTORIZADOS</strong>
-
   {% endif %} 
 
   {% include 'components/mensajes.html' %}  
@@ -112,34 +113,5 @@
 {% endblock content_main %}
 
 {% block javascript %}
-  
   <script defer src="{% static 'js/carga_documento.js' %}"></script>
-
-  <script>
-    function changeState(itemId, itemName) {
-      if (!confirm('¿Estás seguro de que deseas cambien el estado de ' + itemName + '?')) {
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-      formData.append('item_id', itemId);
-
-      fetch("{% url 'PdfEdit' %}", {
-        method: 'POST',
-        body: formData,
-      })
-      .then(response => response.json())
-      .then(data => {
-        
-        location.reload()
-        
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('Hubo un error al cambiar el estado.');
-      });
-    }
-  </script>
-
 {% endblock javascript %}

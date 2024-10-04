@@ -1,0 +1,7 @@
+{% load tailwind_filters %}
+
+<form method="POST" action="{% url 'PdfEdit' object.id %}">
+    {% csrf_token %}
+    {{ form|crispy }}
+    {% include "components/btn/button.html" with button_text="Guardar" %}
+</form>

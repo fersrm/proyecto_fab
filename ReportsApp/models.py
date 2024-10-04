@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime
 
 # Create your models here.
 
@@ -70,13 +71,12 @@ class Legal(models.Model):
 # se une todo
 class NNA(models.Model):
     cod_nna = models.IntegerField(unique=True)
-    type_of_attention = models.BooleanField(default=True)
     person_FK = models.OneToOneField(Person, on_delete=models.CASCADE)
-    location_FK = models.ForeignKey(Location, on_delete=models.CASCADE)
-    solicitor_FK = models.ForeignKey(Solicitor, on_delete=models.CASCADE)
-    legal_FK = models.ForeignKey(Legal, on_delete=models.CASCADE)
+    location_FK = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+    solicitor_FK = models.ForeignKey(Solicitor, on_delete=models.SET_NULL, null=True)
+    legal_FK = models.ForeignKey(Legal, on_delete=models.SET_NULL, null=True)
     registration_date = models.DateTimeField(auto_now_add=True)
-    user_FK = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user_FK = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return str(self.person_FK.name)
@@ -90,7 +90,12 @@ class NNA(models.Model):
 class Project(models.Model):
     code = models.IntegerField(unique=True)
     project_name = models.CharField(max_length=100)
+    type_of_attention = models.BooleanField(default=True)
+    date_project = models.DateField(default=datetime.now)
+    ability = models.IntegerField(default=30)
+    duration = models.IntegerField(default=12)
     institution_FK = models.ManyToManyField(Institution, related_name="projects")
+    location_FK = models.ForeignKey(Location, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.project_name
@@ -105,3 +110,10 @@ class EntryDetails(models.Model):
 
     def __str__(self):
         return f"Entro en {self.date_of_entry}"
+
+
+class ProjectExtension(models.Model):
+    extension = models.IntegerField(default=6)
+    approved = models.BooleanField(default=False)
+    nna_FK = models.ForeignKey(NNA, on_delete=models.CASCADE)
+    project_FK = models.ForeignKey(Project, on_delete=models.CASCADE)

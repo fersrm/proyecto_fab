@@ -18,11 +18,6 @@
 
   <div class="mt-14"> 
 
-    <div>
-      <h2 class=" text-zinc-400 text-center pb-3 text-2xl" >Cantidad de Personas por Tipo de Atención</h2>
-      <div class="w-full h-[500px]" id="chart"></div>
-    </div>  
-
     <div id="grafico2" class="sm:h-dvh">
       <h2 class=" text-zinc-400 text-center pb-3 text-2xl mt-20" >Top 20 Comunas con Mayor Cantidad de Causas</h2>
       <div class="w-full h-[600px]" id="chart2"></div>
@@ -56,9 +51,6 @@
     const communes = {{ communes|safe }};
     const maleLegalCounts = {{ male_legal_counts }};
     const femaleLegalCounts = {{ female_legal_counts }};
-    const mujeresAtencion = {{ female_attention }};
-    const hombresAtencion = {{ male_attention }};
-    const tipoAtencion = {{ attention|safe }};
     const rutaGeoJson = '{% static "js/geoJson.json" %}';
   </script>
   <script defer src="{% static 'js/chats.js' %}"></script>

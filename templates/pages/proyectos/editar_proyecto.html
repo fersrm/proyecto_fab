@@ -2,22 +2,19 @@
 {% load tailwind_filters %}
 
 {% block head_title %}
-  Editar NNA
+  Editar Proyecto
 {% endblock head_title %}
 
 {% block content_pages %}
 
   <h1 class="max-w-2xl font-bold tracking-tight text-gray-900 text-2xl mb-4">Editar</h1>
-  <form method="POST">
+  <form method="POST" action="{% url 'ProjectEdit' object.id %}">
       {% csrf_token %}
-      {{ person_form|crispy }}
-      {{ nna_form|crispy }}
-
+      {{ form|crispy }}
       {% include "components/btn/button.html" with button_text="Guardar" %}
-
-      {% url 'ReportList' as report_list_url %}
-      {% include "components/btn/ancor_cancelar.html" with ancor_link=report_list_url ancor_text="Cancelar" %}
-
   </form>
+
+  {% url 'ProjectList' as project_list_url %}
+  {% include "components/btn/ancor_cancelar.html" with ancor_link=project_list_url ancor_text="Cancelar" %}
 
 {% endblock content_pages %}

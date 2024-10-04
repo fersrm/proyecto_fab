@@ -545,54 +545,6 @@ class ChartsReportNnaTemplateView(LoginRequiredMixin, TemplateView):
         context["male_legal_counts"] = male_legal_counts
         context["female_legal_counts"] = female_legal_counts
 
-        # Consulta para obtener el conteo de atención por tipo y género
-        nnas_attention_m = (
-            NNA.objects.filter(person_FK__sex=True)
-            .values("type_of_attention")
-            .annotate(count=Count("id"))
-        )
-
-        nnas_attention_f = (
-            NNA.objects.filter(person_FK__sex=False)
-            .values("type_of_attention")
-            .annotate(count=Count("id"))
-        )
-
-        # Diccionarios para almacenar los resultados
-        results_m = defaultdict(int)
-        results_f = defaultdict(int)
-
-        # Llenar los diccionarios con los resultados de las consultas
-        for item in nnas_attention_m:
-            results_m[item["type_of_attention"]] = item["count"]
-
-        for item in nnas_attention_f:
-            results_f[item["type_of_attention"]] = item["count"]
-
-        # Obtener las claves únicas de ambos diccionarios
-        attention_keys = set(results_m.keys()) | set(results_f.keys())
-
-        # Ordenar las claves según el criterio especificado
-        sorted_keys = sorted(
-            attention_keys, key=lambda x: "RESIDENCIAL" if x else "AMBULATORIA"
-        )
-
-        # Listas para almacenar los resultados ordenados
-        attention = []
-        male_attention = []
-        female_attention = []
-
-        # Iterar sobre las claves y llenar las listas en el orden deseado
-        for key in sorted_keys:
-            attention.append("RESIDENCIAL" if key else "AMBULATORIA")
-            male_attention.append(results_m[key])
-            female_attention.append(results_f[key])
-
-        # añade las listas al contexto
-        context["attention"] = attention
-        context["male_attention"] = male_attention
-        context["female_attention"] = female_attention
-
         return context
 
 
