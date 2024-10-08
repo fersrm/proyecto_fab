@@ -17,6 +17,8 @@
           error(message.text);
         } else if (message.tags.includes('success') && !message.text.includes('Ha cerrado sesión') && !message.text.includes('Ha iniciado sesión exitosamente')) {
           success(message.text);
+        } else if (message.tags.includes('info')) {
+          warning(message.text);
         }
       });
     });

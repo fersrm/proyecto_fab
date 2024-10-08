@@ -115,5 +115,11 @@ class EntryDetails(models.Model):
 class ProjectExtension(models.Model):
     extension = models.IntegerField(default=6)
     approved = models.BooleanField(default=False)
+    date = models.DateField(auto_now_add=True)
+    reason = models.TextField(max_length=1000)
     nna_FK = models.ForeignKey(NNA, on_delete=models.CASCADE)
     project_FK = models.ForeignKey(Project, on_delete=models.CASCADE)
+    user_FK = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return str(self.nna_FK.cod_nna)

@@ -5,7 +5,9 @@ from .models import DocumentPDF
 class DocumentPdfCreateForm(forms.ModelForm):
     class Meta:
         model = DocumentPDF
-        fields = ["pdf",]
+        fields = [
+            "pdf",
+        ]
 
     def clean_pdf(self):
         pdf = self.cleaned_data["pdf"]
@@ -25,5 +27,7 @@ class DocumentPdfCreateForm(forms.ModelForm):
 class DocumentPdfUpdateForm(forms.ModelForm):
     class Meta:
         model = DocumentPDF
-        fields = ["state",]
+        fields = [
+            "state",
+        ]
         labels = {"state": "Cambiar Estado"}

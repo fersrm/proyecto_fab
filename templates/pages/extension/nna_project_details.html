@@ -1,0 +1,80 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+
+{% block content_main %}  
+
+  <div class="flex flex-col gap-3 mb-5">
+    <h2 class="text-2xl font-medium text-gray-200 text-center">Proyectos de {{ nna.person_FK.name }}</h2>
+    {% for project_info in projects_with_durations %}
+
+      <div class="flex min-h-full flex-col justify-center sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-[680px]">
+          <div class="bg-white px-6 py-10 shadow rounded-lg sm:px-12">
+
+            <h3 class="text-base font-medium text-gray-900">Proyecto: {{ project_info.project.project_name }}</h3>
+            <p class="text-sm font-medium text-gray-900">Veces extendido: {{ project_info.extension_count }}</p>
+            <p class="text-sm font-medium text-gray-900">Total: {{ project_info.total_duration }} meses</p>
+
+            {% url 'ProjectExtensionCreate' nna.pk project_info.project.pk as project_list_url %}
+            {% include "components/btn/ancor_btn.html" with ancor_link=project_list_url button_text="Extender Proyecto" %} 
+
+            {% if project_info.extension_count > 0 %}
+
+              <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                <table class="min-w-full divide-y divide-gray-300">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">Extensión N°</th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Duración de Extensión</th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Usuario</th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200">
+                    {% for extension in project_info.extensions %}
+                      <tr>
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">{{ forloop.counter }}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ extension.extension }} meses</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ extension.user_FK.username }}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {% if extension.approved %}
+                            <div class="text-center bg-emerald-600 rounded-md dark:bg-emerald-600 text-white capitalize p-2 text-sm tracking-wide">
+                              Aprobada
+                            </div> 
+                          {% elif user.profile.position_FK.permission_code != "RESTRICTED" %}
+                            <div x-data="{ modelOpen: false }">
+                              <button @click="modelOpen =!modelOpen" class="w-full flex items-center justify-center px-3 space-x-2 text-sm tracking-wide text-white capitalize transition-colors duration-200 transform bg-amber-500 rounded-md hover:bg-amber-400 focus:outline-none focus:bg-amber-400 focus:ring focus:ring-amber-200 focus:ring-opacity-50" 
+                                onclick="abrir_modal_pdf_edit('{% url 'ProjectExtensionEdit' extension.id %}', {{ extension.id }});">
+                                En Espera
+                              </button>
+                              {% include "components/modal/modal_form.html" with id_modal=extension.id %}
+                            </div>
+                          {% else %}
+                            <div class="text-center bg-amber-500 rounded-md text-white capitalize p-2 text-sm tracking-wide">
+                              En Espera
+                            </div>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+            {% else %}
+              <strong>Este proyecto no tiene extensiones.</strong>
+            {% endif %}
+
+            {% include 'components/mensajes.html' %}  
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+        
+{% endblock %}
+
+
+
+
+

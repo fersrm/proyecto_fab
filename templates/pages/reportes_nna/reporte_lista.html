@@ -62,13 +62,13 @@
             </td>
             <td class="py-1 pl-0  text-sm leading-6  md:table-cell">
               <div class="flex gap-2">
-                <a href="{% url 'GeneratePdf' item.id %}?info=all" class="flex items-center w-12 justify-center rounded-md bg-orange-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400">
+                <a href="{% url 'GeneratePdf' item.id %}?info=all" class="flex items-center w-12 justify-center rounded-md bg-orange-300 px-3 py-[10px]text-sm font-semibold leading-6 text-white shadow-sm hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400">
                   {% include "components/svg/svg_descargar.html" %}
                 </a>
                 <div class="relative">
                   <button 
                     type="button" 
-                    class="flex items-center w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600  menu-button"  
+                    class="flex items-center w-full justify-center rounded-md bg-indigo-600 px-3 py-[10px]text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600  menu-button"  
                     data-menu-id="menu{{ forloop.counter }}">
                     {% include "components/svg/svg_descargar_2.html" %}
                   </button>
@@ -81,15 +81,18 @@
                 
                 {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
 
-                  <a href="{% url 'NnaDelete' item.id %}" onclick="return confirm('¿Estás seguro de que deseas borrar NNA {{ item.cod_nna }} ?');" class="flex items-center w-12 justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ">
+                  <a href="{% url 'NnaDelete' item.id %}" onclick="return confirm('¿Estás seguro de que deseas borrar NNA {{ item.cod_nna }} ?');" class="flex items-center w-12 justify-center rounded-md bg-red-500 px-3 py-[10px]text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ">
                     {% include "components/svg/svg_eliminar.html" %}
                   </a>
-                  <a href="{% url "NnaEdit" item.id  %}" class="flex items-center w-12 justify-center rounded-md bg-emerald-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+                  <a href="{% url "NnaEdit" item.id  %}" class="flex items-center w-12 justify-center rounded-md bg-emerald-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
                     {% include "components/svg/svg_editar.html" %}
                   </a>
-
-                {% endif %}
-                
+                  
+                  {% endif %}
+                  
+                  <a href="{% url 'ProjectExtensionDetail' item.id %}" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
+                    {% include "components/svg/svg_ver.html" %}
+                  </a>
               </div>
             </td>
   
@@ -116,8 +119,6 @@
 {% endblock content_main %}
 
 {% block javascript %}
-  
   <script defer src="{% static 'js/carga_documento.js' %}"></script>
   <script defer src="{% static "js/show_form.js" %}"></script>
-
 {% endblock javascript %}

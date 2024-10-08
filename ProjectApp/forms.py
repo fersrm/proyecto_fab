@@ -1,5 +1,5 @@
 from django import forms
-from ReportsApp.models import Project
+from ReportsApp.models import Project, ProjectExtension
 
 
 class ProjectBaseForm(forms.ModelForm):
@@ -44,3 +44,39 @@ class ProjectCreateForm(ProjectBaseForm):
 
 class ProjectUpdateForm(ProjectBaseForm):
     pass
+
+
+#############################
+## Extensiones Proyecto  ####
+#############################
+
+
+class ProjectExtensionCreateForm(forms.ModelForm):
+    class Meta:
+        model = ProjectExtension
+        fields = ["extension", "reason"]
+        widgets = {
+            "extension": forms.NumberInput(attrs={"min": 1}),
+            "reason": forms.Textarea(
+                attrs={
+                    "rows": 7,
+                }
+            ),
+        }
+        labels = {
+            "extension": "Extensión en Meses",
+            "reason": "Motivo",
+        }
+
+
+class ProjectExtensionUpdateForm(forms.ModelForm):
+    class Meta:
+        model = ProjectExtension
+        fields = ["reason", "approved"]
+        widgets = {
+            "reason": forms.Textarea(attrs={"rows": 7, "readonly": "readonly"}),
+        }
+        labels = {
+            "approved": "Aprobado",
+            "reason": "Motivo",
+        }
