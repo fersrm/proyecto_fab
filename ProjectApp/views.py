@@ -1,4 +1,4 @@
-from ReportsApp.models import Project, ProjectExtension, NNA
+from ReportsApp.models import Project, ProjectExtension, NNA, Notification
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.shortcuts import redirect, get_object_or_404
@@ -136,13 +136,12 @@ class ProjectExtensionListView(LoginRequiredMixin, ListView):
             .annotate(total_extension=Sum("extension"))
         )
 
-        # Filtros adicionales de búsqueda
         if search_query:
-            if search_query.isdigit():  # Si es un código de NNA
+            if search_query.isdigit():
                 project_extensions = project_extensions.filter(
                     nna_FK__cod_nna=search_query
                 )
-            else:  # Si es RUT
+            else:
                 project_extensions = project_extensions.filter(
                     nna_FK__person_FK__rut=search_query
                 )
@@ -278,3 +277,39 @@ class ProjectExtensionUpdateView(LoginRequiredMixin, PermitsPositionMixin, Updat
 
     def get_success_url(self):
         return reverse_lazy("ProjectExtensionList")
+
+
+###############################
+##### Notificaciones ##########
+###############################
+from utils.notification import generar_alertas_nna_proyectos
+
+
+class NotificationListView(LoginRequiredMixin, ListView):
+    model = Notification
+    template_name = "pages/extension/notificaciones.html"
+    paginate_by = 7
+
+    def get_queryset(self):
+        search_query = self.request.GET.get("search")
+        # generar_alertas_nna_proyectos()
+
+        notifications = Notification.objects.filter(is_active=True).order_by(
+            "-alert_type"
+        )
+        if search_query:
+            if search_query.isdigit():
+                notifications = notifications.filter(nna_FK__cod_nna=search_query)
+            else:
+                notifications = notifications.filter(
+                    nna_FK__person_FK__rut=search_query
+                )
+        return notifications
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        paginator = Paginator(context["object_list"], self.paginate_by)
+        page = self.request.GET.get("page")
+        context["object_list"] = paginator.get_page(page)
+        context["placeholder"] = "Buscar por código NNA o RUT"
+        return context

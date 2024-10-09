@@ -27,4 +27,10 @@ urlpatterns = [
         views.ProjectExtensionUpdateView.as_view(),
         name="ProjectExtensionEdit",
     ),
+    ##############  Notificaciones ###############################
+    path(
+        "extension/notificaciones/",
+        views.NotificationListView.as_view(),
+        name="NotificationList",
+    ),
 ]

@@ -123,3 +123,22 @@ class ProjectExtension(models.Model):
 
     def __str__(self):
         return str(self.nna_FK.cod_nna)
+
+
+class Notification(models.Model):
+    TIPOS_ALERTA = [
+        ("AMARILLA", "Amarilla"),
+        ("ROJA", "Roja"),
+    ]
+
+    alert_type = models.CharField(max_length=10, choices=TIPOS_ALERTA)
+    creation_date = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    total_duration = models.IntegerField()
+    nna_FK = models.ForeignKey(
+        NNA, on_delete=models.CASCADE, related_name="notificaciones"
+    )
+    project_FK = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.alert_type} para {self.nna_FK}"

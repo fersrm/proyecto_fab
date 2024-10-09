@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
 from UsuarioApp.models import Profile
-from ReportsApp.models import NNA
+from ReportsApp.models import NNA, Notification
 from DocumentoApp.models import DocumentPDF
 
 # Create your views here.
@@ -53,5 +53,16 @@ class HomeView(LoginRequiredMixin, ListView):
         context["pdf_count"] = pdf_count
         context["latest_registration_date_pdf"] = latest_registration_date_pdf
         context["latest_registration_user_pdf"] = latest_registration_user_pdf
+
+        # Agrega el total de alertas ROJA y AMARILLA
+        total_alertas_amarillas = Notification.objects.filter(
+            alert_type="AMARILLA", is_active=True
+        ).count()
+        total_alertas_rojas = Notification.objects.filter(
+            alert_type="ROJA", is_active=True
+        ).count()
+
+        context["total_alertas_amarillas"] = total_alertas_amarillas
+        context["total_alertas_rojas"] = total_alertas_rojas
 
         return context
