@@ -78,21 +78,23 @@
                   {% include "pages/reportes_nna/components/form_reporte.html" %}
                   </div>
                 </div>
+
+                <a href="{% url 'ProjectExtensionDetail' item.id %}" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
+                  {% include "components/svg/svg_ver.html" %}
+                </a>
                 
                 {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
+
+                  <a href="{% url "NnaEdit" item.id  %}" class="flex items-center w-12 justify-center rounded-md bg-emerald-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+                    {% include "components/svg/svg_editar.html" %}
+                  </a>
 
                   <a href="{% url 'NnaDelete' item.id %}" onclick="return confirm('¿Estás seguro de que deseas borrar NNA {{ item.cod_nna }} ?');" class="flex items-center w-12 justify-center rounded-md bg-red-500 px-3 py-[10px]text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ">
                     {% include "components/svg/svg_eliminar.html" %}
                   </a>
-                  <a href="{% url "NnaEdit" item.id  %}" class="flex items-center w-12 justify-center rounded-md bg-emerald-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
-                    {% include "components/svg/svg_editar.html" %}
-                  </a>
                   
-                  {% endif %}
-                  
-                  <a href="{% url 'ProjectExtensionDetail' item.id %}" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
-                    {% include "components/svg/svg_ver.html" %}
-                  </a>
+                {% endif %}
+
               </div>
             </td>
   

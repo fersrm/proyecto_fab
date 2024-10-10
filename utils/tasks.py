@@ -1,6 +1,7 @@
 from django.db.models import Sum
 from ReportsApp.models import Notification, NNA, ProjectExtension, Project
 from concurrent.futures import ThreadPoolExecutor
+from celery import shared_task
 
 
 def alertas_nna_proyecto(nna, project):
@@ -47,6 +48,7 @@ def alertas_nna_proyecto(nna, project):
         ).update(is_active=False)
 
 
+@shared_task
 def generar_alertas_nna_proyectos():
     with ThreadPoolExecutor(max_workers=6) as executor:
         for nna in NNA.objects.all():
@@ -57,4 +59,4 @@ def generar_alertas_nna_proyectos():
                 for project in nna_projects
             ]
             for future in futures:
-                future.result()  # Esperar la finalización de cada tarea
+                future.result()

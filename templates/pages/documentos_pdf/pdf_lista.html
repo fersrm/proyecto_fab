@@ -34,11 +34,11 @@
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Documentos</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Subido</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Ver Archivo</th>
-            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Descargar</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Descargar</th>
             {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
-              <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Estado</th>
-              <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Eliminar</th>
               <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Cambiar Estado</th>
+              <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Estado</th>
+              <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Eliminar</th>
             {% endif %}
           </tr>
         </thead>
@@ -66,6 +66,16 @@
         
             {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
 
+              <td class="py-1 pl-0 text-sm leading-6 md:table-cell">
+                <div x-data="{ modelOpen: false }">
+                  <button @click="modelOpen =!modelOpen" class="flex items-center justify-center px-3 space-x-2 text-sm tracking-wide text-white capitalize transition-colors duration-200 transform bg-emerald-600 rounded-md dark:bg-emerald-600  hover:bg-emerald-500 focus:outline-none focus:bg-emerald-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50" 
+                    onclick="abrir_modal_pdf_edit('{% url 'PdfEdit' item.id %}', {{ item.id }});">
+                    {% include "components/svg/svg_estado.html" %}
+                  </button>
+                  {% include "components/modal/modal_form.html" with id_modal=item.id %}
+                </div>
+              </td>
+
               <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
                 {% if item.state %}
                   <span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
@@ -77,21 +87,11 @@
                   </span> 
                 {% endif %}
               </td>
-              
-                <td class="py-1 pl-0  text-sm leading-6  md:table-cell">
-                  <a href="{% url "PdfDelete" item.id %}" onclick="return confirm('¿Estás seguro de que deseas borrar {{ item.pdf.name }} ?');" class="flex w-12 justify-center rounded-md bg-red-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ">
-                    {% include "components/svg/svg_eliminar.html" %}
-                  </a>
-              </td>
 
-              <td class="py-1 pl-0 text-sm leading-6 md:table-cell">
-                <div x-data="{ modelOpen: false }">
-                  <button @click="modelOpen =!modelOpen" class="flex items-center justify-center px-3 space-x-2 text-sm tracking-wide text-white capitalize transition-colors duration-200 transform bg-emerald-600 rounded-md dark:bg-emerald-600  hover:bg-emerald-500 focus:outline-none focus:bg-emerald-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50" 
-                    onclick="abrir_modal_pdf_edit('{% url 'PdfEdit' item.id %}', {{ item.id }});">
-                    {% include "components/svg/svg_estado.html" %}
-                  </button>
-                  {% include "components/modal/modal_form.html" with id_modal=item.id %}
-                </div>
+              <td class="py-1 pl-0  text-sm leading-6  md:table-cell">
+                <a href="{% url "PdfDelete" item.id %}" onclick="return confirm('¿Estás seguro de que deseas borrar {{ item.pdf.name }} ?');" class="flex w-12 justify-center rounded-md bg-red-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ">
+                  {% include "components/svg/svg_eliminar.html" %}
+                </a>
               </td>
               
             {% endif %}

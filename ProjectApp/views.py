@@ -282,7 +282,6 @@ class ProjectExtensionUpdateView(LoginRequiredMixin, PermitsPositionMixin, Updat
 ###############################
 ##### Notificaciones ##########
 ###############################
-from utils.notification import generar_alertas_nna_proyectos
 
 
 class NotificationListView(LoginRequiredMixin, ListView):
@@ -292,7 +291,6 @@ class NotificationListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         search_query = self.request.GET.get("search")
-        # generar_alertas_nna_proyectos()
 
         notifications = Notification.objects.filter(is_active=True).order_by(
             "-alert_type"

@@ -49,6 +49,7 @@ THIRD_APPS = [
     "crispy_tailwind",
     "preventconcurrentlogins",
     "axes",
+    "django_celery_beat",
 ]
 
 INSTALLED_APPS = DEFAULT_DJANGO_APPS + LOCAL_APPS + THIRD_APPS
@@ -213,3 +214,7 @@ AXES_COOLOFF_TIME = delta
 AXES_RESET_ON_SUCCESS = True  # restablecerá el número de inicios de sesión fallidos
 AXES_ENABLE_ACCESS_FAILURE_LOG = True
 AXES_LOCK_OUT_AT_FAILURE = True  # bloquea al usuario
+
+# ---------------------REDIS-------------------------------
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
