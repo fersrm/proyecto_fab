@@ -101,9 +101,9 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
         try:
             adapter = ExcelAdapter(row)
             institution = self.get_or_create_institution(adapter)
-            project = self.get_or_create_project(adapter, institution)
-            person = self.get_or_create_person(adapter)
             location = self.get_or_create_location(adapter)
+            project = self.get_or_create_project(adapter, location, institution)
+            person = self.get_or_create_person(adapter)
             solicitor = self.get_or_create_solicitor(adapter)
             legal_quality = self.get_or_create_legal_quality(adapter)
             tribunal = self.get_or_create_tribunal(adapter)
@@ -139,12 +139,17 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
             )
         return self.institutions[institution_name]
 
-    def get_or_create_project(self, adapter, institution):
+    def get_or_create_project(self, adapter, location, institution):
+        attention = adapter.get_attention()
         project_code = adapter.get_project_code()
         project_name = adapter.get_project_name()
+
         if project_code not in self.projects:
             self.projects[project_code] = Project.objects.create(
-                code=project_code, project_name=project_name
+                code=project_code,
+                project_name=project_name,
+                type_of_attention=attention,
+                location_FK=location,
             )
         project = self.projects[project_code]
         project.institution_FK.add(institution)
@@ -210,13 +215,11 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
         return self.legals[proceedings]
 
     def get_or_create_nna(self, adapter, person, location, solicitor, legal, user):
-        attention = adapter.get_attention()
         cod_nna = adapter.get_cod_nna()
 
         if cod_nna in self.existing_nn_as:
             nna = self.existing_nn_as[cod_nna]
             if nna.person_FK.rut == person.rut:
-                nna.type_of_attention = attention
                 nna.person_FK = person
                 nna.location_FK = location
                 nna.solicitor_FK = solicitor
@@ -228,7 +231,6 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
         else:
             nna = NNA.objects.create(
                 cod_nna=cod_nna,
-                type_of_attention=attention,
                 person_FK=person,
                 location_FK=location,
                 solicitor_FK=solicitor,
@@ -263,7 +265,6 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
     def form_invalid(self, form):
         for field, errors in form.errors.items():
             for error in errors:
-                print(field, error)
                 messages.error(self.request, f"{error}")
         return redirect("ReportList")
 
