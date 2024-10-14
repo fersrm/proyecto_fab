@@ -35,20 +35,22 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
-        <p class="text-sm font-medium leading-6 text-gray-400">Total Alertas Rojas</p>
-        <p class="mt-2 flex items-baseline gap-x-2">
-          <span class="text-4xl font-semibold tracking-tight text-white">{{ total_alertas_rojas|default_if_none:"No ahi registro" }}</span>
-        </p>
+    <a href="{% url "NotificationList" %}">
+      <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
+          <p class="text-sm font-medium leading-6 text-gray-400">Total Alertas Rojas</p>
+          <p class="mt-2 flex items-baseline gap-x-2">
+            <span class="text-4xl font-semibold tracking-tight text-white">{{ total_alertas_rojas|default_if_none:"No ahi registro" }}</span>
+          </p>
+        </div>
+        <div class="border-t border-e border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+          <p class="text-sm font-medium leading-6 text-gray-400">Total Alertas Amarillas</p>
+          <p class="mt-2 flex items-baseline gap-x-2">
+            <span class="text-4xl font-semibold tracking-tight text-white">{{ total_alertas_amarillas|default_if_none:"No ahi registro" }}</span>
+          </p>
+        </div>
       </div>
-      <div class="border-t border-e border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
-        <p class="text-sm font-medium leading-6 text-gray-400">Total Alertas Amarillas</p>
-        <p class="mt-2 flex items-baseline gap-x-2">
-          <span class="text-4xl font-semibold tracking-tight text-white">{{ total_alertas_amarillas|default_if_none:"No ahi registro" }}</span>
-        </p>
-      </div>
-    </div>
+    </a>
 
   </header>
   

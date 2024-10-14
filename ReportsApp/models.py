@@ -62,7 +62,7 @@ class Legal(models.Model):
     proceedings = models.CharField(max_length=50, unique=True)
     cause_of_entry = models.CharField(max_length=200)
     legal_quality_FK = models.ForeignKey(LegalQuality, on_delete=models.CASCADE)
-    tribunal_FK = models.ForeignKey(Tribunal, on_delete=models.CASCADE)
+    tribunal_FK = models.ForeignKey(Tribunal, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.proceedings

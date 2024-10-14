@@ -9,7 +9,7 @@ class DocumentPDF(models.Model):
     pdf = models.FileField(upload_to="document/")
     state = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
-    user_FK = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_FK = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         verbose_name = "Documento"
