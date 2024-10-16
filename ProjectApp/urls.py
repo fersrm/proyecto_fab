@@ -6,7 +6,7 @@ urlpatterns = [
     path("agregar/", views.ProjectCreateView.as_view(), name="ProjectCreate"),
     path("editar/<int:pk>/", views.ProjectUpdateView.as_view(), name="ProjectEdit"),
     path("borrar/<int:pk>/", views.ProjectDeleteView.as_view(), name="ProjectDelete"),
-    ##############  Exenciones ###############################
+    ##############  Extensiones NNA ###############################
     path(
         "extension/",
         views.ProjectExtensionListView.as_view(),
@@ -32,5 +32,26 @@ urlpatterns = [
         "extension/notificaciones/",
         views.NotificationListView.as_view(),
         name="NotificationList",
+    ),
+    ##############  Extensiones Proyectos ########################
+    path(
+        "extension_proyecto/",
+        views.OnlyProjectExtensionListView.as_view(),
+        name="OnlyProjectExtensionList",
+    ),
+    path(
+        "extension_proyecto/detalle/<int:pk>/",
+        views.OnlyProjectExtensionDetailView.as_view(),
+        name="OnlyProjectExtensionDetail",
+    ),
+    path(
+        "project/<int:project_pk>/extension_proyecto/agregar/",
+        views.OnlyProjectExtensionCreateView.as_view(),
+        name="OnlyProjectExtensionCreate",
+    ),
+    path(
+        "extension_proyecto/editar/<int:pk>/",
+        views.OnlyProjectExtensionUpdateView.as_view(),
+        name="OnlyProjectExtensionEdit",
     ),
 ]

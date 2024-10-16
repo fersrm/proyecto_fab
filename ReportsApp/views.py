@@ -150,10 +150,10 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
                 project_name=project_name,
                 type_of_attention=attention,
                 location_FK=location,
+                institution_FK=institution,
             )
-        project = self.projects[project_code]
-        project.institution_FK.add(institution)
-        return project
+
+        return self.projects[project_code]
 
     def get_or_create_person(self, adapter):
         rut = adapter.get_rut()

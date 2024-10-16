@@ -94,8 +94,13 @@ class Project(models.Model):
     date_project = models.DateField(default=datetime.now)
     ability = models.IntegerField(default=30)
     duration = models.IntegerField(default=12)
-    institution_FK = models.ManyToManyField(Institution, related_name="projects")
+    institution_FK = models.ForeignKey(
+        Institution, on_delete=models.CASCADE, related_name="projects"
+    )
     location_FK = models.ForeignKey(Location, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("institution_FK", "code")
 
     def __str__(self):
         return self.project_name
@@ -142,3 +147,15 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.alert_type} para {self.nna_FK}"
+
+
+class OnlyProjectExtension(models.Model):
+    extension = models.IntegerField(default=6)
+    approved = models.BooleanField(default=False)
+    date = models.DateField(auto_now_add=True)
+    reason = models.TextField(max_length=1000)
+    project_FK = models.ForeignKey(Project, on_delete=models.CASCADE)
+    user_FK = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return str(self.project_FK.code)

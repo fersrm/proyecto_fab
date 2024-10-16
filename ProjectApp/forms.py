@@ -1,5 +1,5 @@
 from django import forms
-from ReportsApp.models import Project, ProjectExtension
+from ReportsApp.models import Project, ProjectExtension, OnlyProjectExtension
 
 
 class ProjectBaseForm(forms.ModelForm):
@@ -33,12 +33,15 @@ class ProjectBaseForm(forms.ModelForm):
 
 
 class ProjectCreateForm(ProjectBaseForm):
+    date_project = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), label="Fecha de Inicio"
+    )
+
     class Meta(ProjectBaseForm.Meta):
         fields = ["code"] + ProjectBaseForm.Meta.fields + ["date_project"]
         labels = {
             **ProjectBaseForm.Meta.labels,
             "code": "Código",
-            "date_project": "Fecha de Proyecto",
         }
 
 
@@ -46,9 +49,9 @@ class ProjectUpdateForm(ProjectBaseForm):
     pass
 
 
-#############################
-## Extensiones Proyecto  ####
-#############################
+################################
+## Extensiones Proyecto NNA ####
+################################
 
 
 class ProjectExtensionCreateForm(forms.ModelForm):
@@ -72,6 +75,42 @@ class ProjectExtensionCreateForm(forms.ModelForm):
 class ProjectExtensionUpdateForm(forms.ModelForm):
     class Meta:
         model = ProjectExtension
+        fields = ["reason", "approved"]
+        widgets = {
+            "reason": forms.Textarea(attrs={"rows": 7, "readonly": "readonly"}),
+        }
+        labels = {
+            "approved": "Aprobado",
+            "reason": "Motivo",
+        }
+
+
+#############################
+## Extensiones Proyecto  ####
+#############################
+
+
+class OnlyProjectExtensionCreateForm(forms.ModelForm):
+    class Meta:
+        model = OnlyProjectExtension
+        fields = ["extension", "reason"]
+        widgets = {
+            "extension": forms.NumberInput(attrs={"min": 1}),
+            "reason": forms.Textarea(
+                attrs={
+                    "rows": 7,
+                }
+            ),
+        }
+        labels = {
+            "extension": "Extensión en Meses",
+            "reason": "Motivo",
+        }
+
+
+class OnlyProjectExtensionUpdateForm(forms.ModelForm):
+    class Meta:
+        model = OnlyProjectExtension
         fields = ["reason", "approved"]
         widgets = {
             "reason": forms.Textarea(attrs={"rows": 7, "readonly": "readonly"}),

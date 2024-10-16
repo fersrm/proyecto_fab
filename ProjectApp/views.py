@@ -1,4 +1,10 @@
-from ReportsApp.models import Project, ProjectExtension, NNA, Notification
+from ReportsApp.models import (
+    Project,
+    ProjectExtension,
+    NNA,
+    Notification,
+    OnlyProjectExtension,
+)
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.shortcuts import redirect, get_object_or_404
@@ -16,6 +22,8 @@ from .forms import (
     ProjectUpdateForm,
     ProjectExtensionCreateForm,
     ProjectExtensionUpdateForm,
+    OnlyProjectExtensionCreateForm,
+    OnlyProjectExtensionUpdateForm,
 )
 
 # Premiosos
@@ -109,9 +117,9 @@ class ProjectDeleteView(LoginRequiredMixin, PermitsPositionMixin, DeleteView):
         return redirect(self.get_success_url())
 
 
-################################
-##### Extensión de Fecha #######
-################################
+###################################
+##### Extensión de Fecha NNA ######
+###################################
 
 
 class ProjectExtensionListView(LoginRequiredMixin, ListView):
@@ -282,6 +290,7 @@ class ProjectExtensionUpdateView(LoginRequiredMixin, PermitsPositionMixin, Updat
 ###############################
 ##### Notificaciones ##########
 ###############################
+from utils.tasks import generar_alertas_nna_proyectos
 
 
 class NotificationListView(LoginRequiredMixin, ListView):
@@ -291,7 +300,7 @@ class NotificationListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         search_query = self.request.GET.get("search")
-
+        # generar_alertas_nna_proyectos()
         notifications = Notification.objects.filter(is_active=True).order_by(
             "-alert_type"
         )
@@ -311,3 +320,163 @@ class NotificationListView(LoginRequiredMixin, ListView):
         context["object_list"] = paginator.get_page(page)
         context["placeholder"] = "Buscar por código NNA o RUT"
         return context
+
+
+#############################################
+##### Extensión de Fecha de Proyectos #######
+#############################################
+
+
+class OnlyProjectExtensionListView(LoginRequiredMixin, ListView):
+    model = OnlyProjectExtension
+    template_name = "pages/proyectos/extension/proyectos_extension.html"
+    paginate_by = 7
+
+    def get_queryset(self):
+        # Obtén el parámetro de búsqueda de la solicitud GET
+        search_query = self.request.GET.get("search")
+
+        # Consulta inicial para obtener extensiones aprobadas y sumar la extensión de cada proyecto
+        project_extensions = (
+            OnlyProjectExtension.objects.filter(approved=True)
+            .select_related("project_FK")
+            .values(
+                "project_FK__code",
+                "project_FK__project_name",
+                "project_FK__type_of_attention",
+                "project_FK__duration",
+                "project_FK",
+            )
+            .annotate(total_extension=Sum("extension"))
+        )
+
+        # Filtra por código de proyecto si se proporciona un valor de búsqueda
+        if search_query:
+            if search_query.isdigit():
+                project_extensions = project_extensions.filter(
+                    project_FK__code=search_query
+                )
+            else:
+                project_extensions = project_extensions.filter(
+                    project_FK__project_name__icontains=search_query
+                )
+
+        # Procesa y construye los datos de proyectos con extensiones acumuladas
+        projects_data = []
+        for extension in project_extensions:
+            code = extension["project_FK__code"]
+            project_name = extension["project_FK__project_name"]
+            type_of_attention = extension["project_FK__type_of_attention"]
+            duration = extension["project_FK__duration"]
+            total_extension = extension["total_extension"]
+            project = extension["project_FK"]
+
+            # Calcula la duración total del proyecto incluyendo las extensiones
+            total_duration = duration + total_extension
+
+            # Agrega los datos del proyecto al listado final
+            projects_data.append(
+                {
+                    "code": code,
+                    "project_name": project_name,
+                    "type_of_attention": type_of_attention,
+                    "base_duration": duration,
+                    "veces_extension": OnlyProjectExtension.objects.filter(
+                        project_FK=project
+                    ).count(),
+                    "total_duration": total_duration,
+                    "id": project,
+                }
+            )
+
+        return projects_data
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        paginator = Paginator(context["object_list"], self.paginate_by)
+        page = self.request.GET.get("page")
+        context["object_list"] = paginator.get_page(page)
+        context["placeholder"] = "Buscar por código o nombre de proyecto"
+        return context
+
+
+class OnlyProjectExtensionCreateView(LoginRequiredMixin, CreateView):
+    model = OnlyProjectExtension
+    form_class = OnlyProjectExtensionCreateForm
+    template_name = "pages/proyectos/extension/extension_create_proyecto.html"
+
+    def form_valid(self, form):
+        # Obtenemos el proyecto y el usuario actual
+        project = get_object_or_404(Project, pk=self.kwargs["project_pk"])
+        user = self.request.user
+
+        form.instance.project_FK = project
+        form.instance.user_FK = user
+
+        # Lógica de aprobación automática si la extensión es menor a 7 meses
+        if form.instance.extension < 7:
+            form.instance.approved = True
+            messages.success(self.request, "La extensión fue aprobada automáticamente.")
+        else:
+            form.instance.approved = False
+            messages.info(self.request, "La extensión queda en espera de aprobación.")
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        # Redirige a la página de detalle del proyecto después de crear la extensión
+        return reverse_lazy(
+            "OnlyProjectExtensionDetail", kwargs={"pk": self.kwargs["project_pk"]}
+        )
+
+
+class OnlyProjectExtensionDetailView(LoginRequiredMixin, DetailView):
+    model = Project
+    template_name = "pages/proyectos/extension/project_details.html"
+    context_object_name = "project"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Obtenemos todas las extensiones aprobadas para el proyecto actual
+        all_extensions = OnlyProjectExtension.objects.filter(project_FK=self.object)
+
+        total_extension_months = (
+            all_extensions.aggregate(Sum("extension"))["extension__sum"] or 0
+        )
+        total_duration = self.object.duration + total_extension_months
+
+        context["project_details"] = {
+            "project": self.object,
+            "base_duration": self.object.duration,
+            "extension_count": all_extensions.count(),
+            "total_extension": total_extension_months,
+            "total_duration": total_duration,
+            "extensions": all_extensions,
+        }
+
+        return context
+
+
+class OnlyProjectExtensionUpdateView(
+    LoginRequiredMixin, PermitsPositionMixin, UpdateView
+):
+    model = OnlyProjectExtension
+    form_class = OnlyProjectExtensionUpdateForm
+    template_name = "pages/proyectos/extension/editar_proyecto_extension.html"
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, "La extensión se aprobó correctamente.")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Error en el formulario")
+        for field, errors in form.errors.items():
+            for error in errors:
+                print(field, error)
+                messages.error(self.request, f"{error}")
+        return redirect("OnlyProjectExtensionEdit")
+
+    def get_success_url(self):
+        return reverse_lazy("OnlyProjectExtensionList")
