@@ -1,4 +1,5 @@
 from utils.helpers import parse_date
+from datetime import datetime
 import pandas as pd
 
 
@@ -73,9 +74,6 @@ class ExcelAdapter:
     def get_cod_nna(self):
         return int(self.row["codNNA"])
 
-    def get_current(self):
-        return True if str(self.row["vigencia"]).strip().lower() == "si" else False
-
     def get_admission_date(self):
         return parse_date(self.row["fechaingreso"])
 
@@ -85,3 +83,13 @@ class ExcelAdapter:
             if not pd.isnull(self.row["fechaegreso"]) and self.row["fechaegreso"] != ""
             else None
         )
+
+    def get_current(self):
+        is_active = str(self.row["vigencia"]).strip().lower() == "si"
+
+        if is_active:
+            discharge_date = self.get_discharge_date()
+            if discharge_date and discharge_date < datetime.now().date():
+                return False
+            return True
+        return False

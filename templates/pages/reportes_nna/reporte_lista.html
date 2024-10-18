@@ -80,7 +80,7 @@
                 </div>
 
                 <a href="{% url 'ProjectExtensionDetail' item.id %}" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
-                  {% include "components/svg/svg_ver.html" %}
+                  {% include "components/svg/svg_extender.html" %}
                 </a>
                 
                 {% if user.profile.position_FK.permission_code != "RESTRICTED" %}

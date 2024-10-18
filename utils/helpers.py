@@ -78,7 +78,7 @@ def parse_date(date_str):
     for fmt in formats:
         try:
             parsed_date = pd.to_datetime(date_str, format=fmt)
-            return parsed_date.strftime("%Y-%m-%d")
+            return parsed_date.date()
         except ValueError:
             continue
 

@@ -1395,10 +1395,6 @@ select {
   row-gap: 1.25rem;
 }
 
-.gap-y-6 {
-  row-gap: 1.5rem;
-}
-
 .gap-y-7 {
   row-gap: 1.75rem;
 }
@@ -1882,6 +1878,10 @@ select {
 .py-\[10px\] {
   padding-top: 10px;
   padding-bottom: 10px;
+}
+
+.pb-2 {
+  padding-bottom: 0.5rem;
 }
 
 .pb-3 {

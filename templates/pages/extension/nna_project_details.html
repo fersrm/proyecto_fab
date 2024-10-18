@@ -11,7 +11,8 @@
         <div class="sm:mx-auto sm:w-full sm:max-w-[680px]">
           <div class="bg-white px-6 py-10 shadow rounded-lg sm:px-12">
 
-            <h3 class="text-base font-medium text-gray-900">Proyecto: {{ project_info.project.project_name }}</h3>
+            <h3 class="text-base font-medium text-gray-900 pb-2">Proyecto: {{ project_info.project.project_name }}</h3>
+            <p class="text-sm font-medium text-gray-900">Codigo: {{ project_info.project.code }}</p>
             <p class="text-sm font-medium text-gray-900">Veces extendido: {{ project_info.extension_count }}</p>
             <p class="text-sm font-medium text-gray-900">Total: {{ project_info.total_duration }} meses</p>
 

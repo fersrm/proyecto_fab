@@ -308,18 +308,19 @@ class GeneratePdfNnaView(LoginRequiredMixin, View):
             project = entry.project_FK
             if project.code not in added_projects:
                 added_projects.add(project.code)
+
+                institution_name = project.institution_FK.institution_name
+
                 admission_date = entry.date_of_entry.strftime("%d-%m-%Y")
                 discharge_date = (
                     entry.date_of_exit.strftime("%d-%m-%Y")
                     if entry.date_of_exit
                     else "N/A"
                 )
-                instituciones = ", ".join(
-                    project.institution_FK.values_list("institution_name", flat=True)
-                )
+
                 project_information.extend(
                     [
-                        ["Institución", instituciones],
+                        ["Institución", institution_name],
                         ["Proyecto", project.project_name],
                         ["Fecha de Ingreso", admission_date],
                         ["Fecha de Egreso", discharge_date],

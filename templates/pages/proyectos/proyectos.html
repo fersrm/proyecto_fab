@@ -29,6 +29,7 @@
           <tr>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Código Proyecto</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Nombre</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Fecha Incio</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Tipo Atención</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Capacidad</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Comuna</th>
@@ -48,6 +49,9 @@
             <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
               {{ item.project_name }}
             </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.date_project }}
+            </td>
             <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
               {% if item.type_of_attention %}
                 Recidencial
@@ -64,7 +68,7 @@
             <td class="py-1 pl-0  text-sm leading-6  md:table-cell">
               <div class="flex gap-2">
                 <a href="{% url 'OnlyProjectExtensionDetail' item.id %}" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
-                  {% include "components/svg/svg_ver.html" %}
+                  {% include "components/svg/svg_extender.html" %}
                 </a>
                 {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
                   <a href="{% url "ProjectEdit" item.id  %}" class="flex items-center w-12 justify-center rounded-md bg-emerald-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">

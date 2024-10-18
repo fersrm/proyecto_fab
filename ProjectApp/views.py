@@ -4,6 +4,7 @@ from ReportsApp.models import (
     NNA,
     Notification,
     OnlyProjectExtension,
+    EntryDetails,
 )
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -120,6 +121,8 @@ class ProjectDeleteView(LoginRequiredMixin, PermitsPositionMixin, DeleteView):
 ###################################
 ##### Extensión de Fecha NNA ######
 ###################################
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 
 
 class ProjectExtensionListView(LoginRequiredMixin, ListView):
@@ -139,6 +142,7 @@ class ProjectExtensionListView(LoginRequiredMixin, ListView):
                 "nna_FK__cod_nna",
                 "nna_FK__person_FK__rut",
                 "nna_FK__person_FK__name",
+                "project_FK__code",
                 "project_FK",
             )
             .annotate(total_extension=Sum("extension"))
@@ -162,14 +166,27 @@ class ProjectExtensionListView(LoginRequiredMixin, ListView):
             rut = extension["nna_FK__person_FK__rut"]
             name = extension["nna_FK__person_FK__name"]
             project = extension["project_FK"]
-            total_extension = extension["total_extension"]
+            project_code = extension["project_FK__code"]
+            total_nna_extension_months = extension["total_extension"]
 
-            # Obtenemos la duración del proyecto original
-            project_duration = Project.objects.get(id=project).duration
+            # Obtenemos los detalles de entrada del NNA al proyecto
+            try:
+                entry_details = EntryDetails.objects.get(nna_FK=nna, project_FK=project)
+                # Calculamos la duración del NNA en el proyecto
+                entry_date = entry_details.date_of_entry
+                if entry_details.date_of_exit:
+                    exit_date = entry_details.date_of_exit
+                    nna_duration = relativedelta(exit_date, entry_date)
+                else:
+                    nna_duration = relativedelta(timezone.now().date(), entry_date)
+                time_in_project_months = (nna_duration.years * 12) + nna_duration.months
+            except EntryDetails.DoesNotExist:
+                time_in_project_months = 0
 
-            # Calculamos la duración total del proyecto con extensiones
-            total_duration = project_duration + total_extension
+            # Calculamos la duración total del NNA en el proyecto
+            total_duration = time_in_project_months + total_nna_extension_months
 
+            print(total_duration)
             # Solo guardamos el proyecto con mayor duración para cada NNA
             if (
                 nna not in nna_projects
@@ -178,9 +195,10 @@ class ProjectExtensionListView(LoginRequiredMixin, ListView):
                 nna_projects[nna] = {
                     "nna_FK": {"id": nna, "cod_nna": cod_nna, "rut": rut, "name": name},
                     "project": project,
+                    "project_code": project_code,
                     "total_duration": total_duration,
                     "extension_count": ProjectExtension.objects.filter(
-                        nna_FK=nna, project_FK=project
+                        nna_FK=nna, project_FK=project, approved=True
                     ).count(),
                 }
 
@@ -210,7 +228,72 @@ class ProjectExtensionCreateView(LoginRequiredMixin, CreateView):
         form.instance.project_FK = project
         form.instance.user_FK = user
 
-        if form.instance.extension < 7:
+        # Duración total del proyecto
+        total_base_duration = project.duration  # en meses
+        approved_project_extensions = project.onlyprojectextension_set.filter(
+            approved=True
+        )
+        total_project_extension_months = sum(
+            extension.extension for extension in approved_project_extensions
+        )
+        total_project_duration_months = (
+            total_base_duration + total_project_extension_months
+        )
+
+        # Fecha de inicio del proyecto
+        start_date = project.date_project
+        time_delta = relativedelta(timezone.now().date(), start_date)
+
+        # Total de meses desde el inicio del proyecto
+        months_since_start = (time_delta.years * 12) + time_delta.months
+        remaining_project_months = total_project_duration_months - months_since_start
+
+        # Tiempo que el NNA ha estado en el proyecto
+        entry_details = EntryDetails.objects.filter(
+            nna_FK=nna, project_FK=project, current_status=True
+        ).first()
+        if not entry_details:
+            messages.error(
+                self.request,
+                "El NNA no tiene un registro de entrada activo en este proyecto.",
+            )
+            return self.form_invalid(form)
+
+        try:
+            entry_date = entry_details.date_of_entry
+            if entry_details.date_of_exit:
+                exit_date = entry_details.date_of_exit
+                nna_duration = relativedelta(exit_date, entry_date)
+            else:
+                nna_duration = relativedelta(timezone.now().date(), entry_date)
+            time_in_project_months = (nna_duration.years * 12) + nna_duration.months
+        except EntryDetails.DoesNotExist:
+            time_in_project_months = 0
+
+        # Sumar las extensiones aprobadas del NNA en este proyecto
+        approved_nna_extensions = ProjectExtension.objects.filter(
+            nna_FK=nna, project_FK=project, approved=True
+        )
+        total_nna_extension_months = sum(
+            extension.extension for extension in approved_nna_extensions
+        )
+        total_nna_time_in_project = time_in_project_months + total_nna_extension_months
+
+        # Calcular el tiempo total proyectado con la nueva extensión
+        requested_extension = form.instance.extension
+        projected_total_nna_time = total_nna_time_in_project + requested_extension
+
+        # Verificar si el tiempo proyectado excede el tiempo restante del proyecto
+        if projected_total_nna_time > total_project_duration_months:
+            messages.error(
+                self.request,
+                f"No es posible extender la estadía de este NNA en el proyecto. "
+                f"Solo le quedan {remaining_project_months} meses activos al proyecto.",
+            )
+            return self.form_invalid(form)
+
+        # Lógica de aprobación automática para extensiones menores a 7 meses
+        if requested_extension < 7:
             form.instance.approved = True
             messages.success(self.request, "La extensión fue aprobada automáticamente.")
         else:
@@ -233,27 +316,47 @@ class ProjectExtensionDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # Obtenemos los proyectos en los que el NNA ha estado
         nna_projects = Project.objects.filter(
             entrydetails__nna_FK=self.object
         ).distinct()
 
         projects_with_durations = []
         for project in nna_projects:
+            # Obtenemos todas las extensiones del proyecto para este NNA
             all_extensions = ProjectExtension.objects.filter(
                 nna_FK=self.object, project_FK=project
             )
 
+            # Filtramos solo las extensiones aprobadas
             approved_extensions = all_extensions.filter(approved=True)
             total_approved_extension_months = (
                 approved_extensions.aggregate(Sum("extension"))["extension__sum"] or 0
             )
 
-            total_duration = project.duration + total_approved_extension_months
+            # Calculamos la duración base del proyecto más las extensiones
+            try:
+                entry_details = EntryDetails.objects.get(
+                    nna_FK=self.object, project_FK=project
+                )
+                entry_date = entry_details.date_of_entry
+                if entry_details.date_of_exit:
+                    exit_date = entry_details.date_of_exit
+                    nna_duration = relativedelta(exit_date, entry_date)
+                else:
+                    nna_duration = relativedelta(timezone.now().date(), entry_date)
+                time_in_project_months = (nna_duration.years * 12) + nna_duration.months
+            except EntryDetails.DoesNotExist:
+                time_in_project_months = 0
 
+            # Sumamos la duración base y las extensiones aprobadas
+            total_duration = time_in_project_months + total_approved_extension_months
+
+            # Añadimos los datos del proyecto con la duración calculada
             projects_with_durations.append(
                 {
                     "project": project,
-                    "base_duration": project.duration,
+                    "base_duration": time_in_project_months,
                     "extension_count": all_extensions.count(),
                     "total_extension": total_approved_extension_months,
                     "total_duration": total_duration,
@@ -261,6 +364,7 @@ class ProjectExtensionDetailView(LoginRequiredMixin, DetailView):
                 }
             )
 
+        # Añadimos los proyectos con duraciones al contexto
         context["projects_with_durations"] = projects_with_durations
         return context
 

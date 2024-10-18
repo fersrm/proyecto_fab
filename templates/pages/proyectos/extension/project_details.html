@@ -10,8 +10,9 @@
         <div class="sm:mx-auto sm:w-full sm:max-w-[680px]">
           <div class="bg-white px-6 py-10 shadow rounded-lg sm:px-12">
 
-            <h3 class="text-base font-medium text-gray-900">Proyecto: {{ project.project_name }}</h3>
-            <p class="text-sm font-medium text-gray-900">Veces extendido: {{ project_details.total_extension }}</p>
+            <h3 class="text-base font-medium text-gray-900 pb-2">Proyecto: {{ project.project_name }}</h3>
+            <p class="text-sm font-medium text-gray-900">Codigo: {{ project.code }}</p>
+            <p class="text-sm font-medium text-gray-900">Veces extendido: {{ project_details.extension_count }}</p>
             <p class="text-sm font-medium text-gray-900">Duración Base: {{ project_details.base_duration }}</p>
             <p class="text-sm font-medium text-gray-900">Total: {{ project_details.total_duration }} meses</p>
             {% url 'OnlyProjectExtensionCreate' project.pk as project_list_url %}

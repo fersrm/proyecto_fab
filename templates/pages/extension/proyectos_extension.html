@@ -43,14 +43,14 @@
               {{ item.extension_count }}
             </td>
             <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
-              {{ item.project }}
+              {{ item.project_code }}
             </td>
             <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
               {{ item.total_duration }} meses
             </td>
             <td>
               <a href="{% url 'ProjectExtensionDetail' item.nna_FK.id %}" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
-                {% include "components/svg/svg_ver.html" %}
+                {% include "components/svg/svg_extender.html" %}
               </a>
             </td>
           </tr>
