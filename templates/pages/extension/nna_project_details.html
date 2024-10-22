@@ -16,8 +16,12 @@
             <p class="text-sm font-medium text-gray-900">Veces extendido: {{ project_info.extension_count }}</p>
             <p class="text-sm font-medium text-gray-900">Total: {{ project_info.total_duration }} meses</p>
 
-            {% url 'ProjectExtensionCreate' nna.pk project_info.project.pk as project_list_url %}
-            {% include "components/btn/ancor_btn.html" with ancor_link=project_list_url button_text="Extender Proyecto" %} 
+            {% if project_info.validity %}
+              {% url 'ProjectExtensionCreate' nna.pk project_info.project.pk as project_list_url %}
+              {% include "components/btn/ancor_btn.html" with ancor_link=project_list_url button_text="Extender Proyecto" %} 
+            {% else %}
+              <strong>Este proyecyo ya no esta activo para el NNA</strong>
+            {% endif %}
 
             {% if project_info.extension_count > 0 %}
 

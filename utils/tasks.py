@@ -1,26 +1,45 @@
 from django.db.models import Sum
-from ReportsApp.models import Notification, NNA, ProjectExtension, Project
+from ReportsApp.models import Notification, NNA, ProjectExtension, Project, EntryDetails
 from concurrent.futures import ThreadPoolExecutor
 from celery import shared_task
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 
 
 def alertas_nna_proyecto(nna, project):
     ALERTA_AMARILLA_MESES = 13
     ALERTA_ROJA_MESES = 18
 
-    # Obtener todas las extensiones aprobadas para el proyecto y el NNA actual
+    # Obtener las extensiones aprobadas para este proyecto y NNA
     approved_extensions = ProjectExtension.objects.filter(
         nna_FK=nna, project_FK=project, approved=True
     )
-    # Sumar la duración base del proyecto y las extensiones aprobadas
     total_approved_extension_months = (
         approved_extensions.aggregate(Sum("extension"))["extension__sum"] or 0
     )
-    total_duration_months = project.duration + total_approved_extension_months
 
-    # Crear o actualizar la notificación según la duración total en meses
+    # Obtener los detalles de entrada del NNA en el proyecto
+    entry_details = EntryDetails.objects.filter(nna_FK=nna, project_FK=project).first()
+
+    # Si no hay detalles de entrada, no podemos calcular la duración
+    if not entry_details:
+        return
+
+    # Calcular la duración base en meses del proyecto
+    entry_date = entry_details.date_of_entry
+    if entry_details.date_of_exit:
+        exit_date = entry_details.date_of_exit
+        nna_duration = relativedelta(exit_date, entry_date)
+    else:
+        nna_duration = relativedelta(timezone.now().date(), entry_date)
+
+    time_in_project_months = (nna_duration.years * 12) + nna_duration.months
+
+    # Sumar la duración base del proyecto y las extensiones aprobadas
+    total_duration_months = time_in_project_months + total_approved_extension_months
+
+    # Actualizar o crear notificación según el tipo de alerta
     if total_duration_months >= ALERTA_ROJA_MESES:
-        # Eliminar notificaciones existentes del mismo tipo
         Notification.objects.filter(
             nna_FK=nna, project_FK=project, alert_type="ROJA"
         ).delete()

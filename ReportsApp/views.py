@@ -18,8 +18,7 @@ from .models import (
     NNA,
 )
 from django.shortcuts import get_object_or_404, redirect, render
-from django.db.models import Count
-from django.db.models import Q
+from django.db.models import Count, OuterRef, Subquery, BooleanField, Q
 from utils.helpers import list_chats
 from django.core.paginator import Paginator
 
@@ -613,6 +612,18 @@ class ReportListDateView(LoginRequiredMixin, ListView):
         queryset = super().get_queryset().order_by("cod_nna")
         search_query = self.request.GET.get("search")
 
+        latest_entry = EntryDetails.objects.filter(nna_FK=OuterRef("pk")).order_by(
+            "-date_of_exit"
+        )
+
+        # Anotación del estado vigente del último proyecto
+        queryset = queryset.annotate(
+            vigente=Subquery(
+                latest_entry.values("current_status")[:1], output_field=BooleanField()
+            )
+        )
+
+        # Aplicar búsqueda
         if search_query:
             if search_query.isdigit():
                 queryset = queryset.filter(Q(cod_nna=search_query))
@@ -622,6 +633,10 @@ class ReportListDateView(LoginRequiredMixin, ListView):
                     | Q(person_FK__rut=search_query)
                     | Q(location_FK__commune__icontains=search_query)
                 )
+
+        # Ordenar por el estado 'vigente' (proyectos vigentes primero)
+        queryset = queryset.order_by("-vigente", "cod_nna")
+
         return queryset
 
     def get_context_data(self, **kwargs):

@@ -365,9 +365,20 @@ class ProjectExtensionDetailView(LoginRequiredMixin, DetailView):
                     "total_extension": total_approved_extension_months,
                     "total_duration": total_duration,
                     "extensions": all_extensions,
+                    "validity":entry_details.current_status,
                 }
             )
-
+            print("*" * 30)
+            print(f"entry_details.date_of_entry: {entry_details.date_of_entry}")
+            print(f"entry_details.date_of_exit: {entry_details.date_of_exit}")
+            print(f"nna_duration: {nna_duration}")
+            print(f"time_in_project_months: {time_in_project_months}")
+            print(
+                f"total_approved_extension_months: { total_approved_extension_months}"
+            )
+            print(f"total_duration: {total_duration}")
+            print(f"validity: {entry_details.current_status}")
+            print("*" * 30)
         # Añadimos los proyectos con duraciones al contexto
         context["projects_with_durations"] = projects_with_durations
         return context
