@@ -170,8 +170,11 @@ class ProjectExtensionListView(LoginRequiredMixin, ListView):
             total_nna_extension_months = extension["total_extension"]
 
             # Obtenemos los detalles de entrada del NNA al proyecto
-            try:
-                entry_details = EntryDetails.objects.get(nna_FK=nna, project_FK=project)
+            entry_details = EntryDetails.objects.filter(
+                nna_FK=nna, project_FK=project
+            ).first()
+
+            if entry_details:
                 # Calculamos la duración del NNA en el proyecto
                 entry_date = entry_details.date_of_entry
                 if entry_details.date_of_exit:
@@ -180,7 +183,7 @@ class ProjectExtensionListView(LoginRequiredMixin, ListView):
                 else:
                     nna_duration = relativedelta(timezone.now().date(), entry_date)
                 time_in_project_months = (nna_duration.years * 12) + nna_duration.months
-            except EntryDetails.DoesNotExist:
+            else:
                 time_in_project_months = 0
 
             # Calculamos la duración total del NNA en el proyecto
@@ -335,10 +338,11 @@ class ProjectExtensionDetailView(LoginRequiredMixin, DetailView):
             )
 
             # Calculamos la duración base del proyecto más las extensiones
-            try:
-                entry_details = EntryDetails.objects.get(
-                    nna_FK=self.object, project_FK=project
-                )
+            entry_details = EntryDetails.objects.filter(
+                nna_FK=self.object, project_FK=project
+            ).first()
+
+            if entry_details:
                 entry_date = entry_details.date_of_entry
                 if entry_details.date_of_exit:
                     exit_date = entry_details.date_of_exit
@@ -346,7 +350,7 @@ class ProjectExtensionDetailView(LoginRequiredMixin, DetailView):
                 else:
                     nna_duration = relativedelta(timezone.now().date(), entry_date)
                 time_in_project_months = (nna_duration.years * 12) + nna_duration.months
-            except EntryDetails.DoesNotExist:
+            else:
                 time_in_project_months = 0
 
             # Sumamos la duración base y las extensiones aprobadas

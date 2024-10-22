@@ -4,14 +4,10 @@ from .choices import PERMISOS
 # Create your models here.
 
 from django.contrib.auth.models import User
-from django.conf import settings
-from django.core.files.storage import default_storage
 from django.utils import timezone
 import uuid
 import os
-from PIL import Image, ImageFile, UnidentifiedImageError
-
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+from utils.customer_img import resize_image, crop_image, handle_old_image
 
 
 def profile_picture_path(instance, filename):
@@ -52,65 +48,16 @@ class Profile(models.Model):
             kwargs["update_fields"] = ["last_activity"]
 
         if self.pk:
-            self.handle_old_image()
+            handle_old_image(Profile, self.pk, self.image)
 
         super(Profile, self).save(*args, **kwargs)
 
         if self.image and os.path.exists(self.image.path):
-            self.resize_image()
-            self.crop_image()
+            resize_image(self.image.path, 300)
+            crop_image(self.image.path, 300)
 
     def update_last_activity(self):
         self.save(update_last_activity=True)
-
-    def handle_old_image(self):
-        default_image = "profile.webp"
-        old_profile = Profile.objects.get(pk=self.pk)
-        default_image_path = os.path.join(settings.MEDIA_ROOT, default_image)
-
-        if (
-            old_profile.image.path != self.image.path
-            and old_profile.image.path != default_image_path
-        ):
-            default_storage.delete(old_profile.image.path)
-
-    def resize_image(self):
-        try:
-            with Image.open(self.image.path) as img:
-                ancho, alto = img.size
-                if alto != 300 or ancho != 300:
-                    if ancho > alto:
-                        nuevo_alto = 300
-                        nuevo_ancho = int((ancho / alto) * nuevo_alto)
-                        img = img.resize(
-                            (nuevo_ancho, nuevo_alto), Image.Resampling.BILINEAR
-                        )
-                    elif alto > ancho:
-                        nuevo_ancho = 300
-                        nuevo_alto = int((alto / ancho) * nuevo_ancho)
-                        img = img.resize(
-                            (nuevo_ancho, nuevo_alto), Image.Resampling.BILINEAR
-                        )
-                    else:
-                        img.thumbnail((300, 300))
-                    img.save(self.image.path)
-        except (FileExistsError, UnidentifiedImageError):
-            print("Error al Redimensionar la imagen")
-
-    def crop_image(self):
-        try:
-            with Image.open(self.image.path) as img:
-                ancho, alto = img.size
-                if alto != 300 or ancho != 300:
-                    lado = min(ancho, alto)
-                    left = (ancho - lado) / 2
-                    top = (alto - lado) / 2
-                    right = (ancho + lado) / 2
-                    bottom = (alto + lado) / 2
-                    img = img.crop((left, top, right, bottom))
-                    img.save(self.image.path)
-        except (FileExistsError, UnidentifiedImageError):
-            print("Erro al Recortar la imagen")
 
     class Meta:
         verbose_name = "Perfil"

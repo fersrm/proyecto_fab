@@ -1,8 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.files.storage import default_storage
 import os
-
-# Create your models here.
 
 
 class DocumentPDF(models.Model):
@@ -22,4 +21,7 @@ class DocumentPDF(models.Model):
     def delete(self, *args, **kwargs):
         if self.pdf and os.path.isfile(self.pdf.path):
             os.remove(self.pdf.path)
+        # Cambiar os.path.isfile a default_storage.exists:
+        # y os.remove(self.pdf.path) por default_storage.delete(self.pdf.name)
+        # para AWS S3
         super(DocumentPDF, self).delete(*args, **kwargs)
