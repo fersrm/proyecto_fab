@@ -8,16 +8,16 @@ class ExcelAdapter:
         self.row = row
 
     def get_institution_name(self):
-        return str(self.row["institucion"]).strip()
+        return str(self.row["institucion"]).strip().upper()
 
     def get_project_code(self):
         return int(self.row["CodProyecto"])
 
     def get_project_name(self):
-        return str(self.row["proyecto"]).strip()
+        return str(self.row["proyecto"]).strip().upper()
 
     def get_rut(self):
-        return str(self.row["rut"]).strip()
+        return str(self.row["rut"]).strip().upper()
 
     def get_sex(self):
         return True if str(self.row["sexo"]).strip().lower() == "m" else False
@@ -26,43 +26,43 @@ class ExcelAdapter:
         return parse_date(self.row["fechanacimiento"])
 
     def get_name(self):
-        return str(self.row["nombres"]).strip()
+        return str(self.row["nombres"]).strip().capitalize()
 
     def get_last_name_paternal(self):
-        return str(self.row["apellido_paterno"]).strip()
+        return str(self.row["apellido_paterno"]).strip().capitalize()
 
     def get_last_name_maternal(self):
-        return str(self.row["apellido_materno"]).strip()
+        return str(self.row["apellido_materno"]).strip().capitalize()
 
     def get_address(self):
-        return str(self.row["DireccionNino"]).strip()
+        return str(self.row["DireccionNino"]).strip().upper()
 
     def get_nationality(self):
-        return str(self.row["Nacionalidad"]).strip()
+        return str(self.row["Nacionalidad"]).strip().upper()
 
     def get_region(self):
         return int(self.row["RegionNino"])
 
     def get_commune(self):
-        return str(self.row["Comuna"]).strip()
+        return str(self.row["Comuna"]).strip().upper()
 
     def get_location_key(self):
         return f"{self.get_region()}-{self.get_commune()}"
 
     def get_solicitor_name(self):
-        return str(self.row["SolicitanteIngreso"]).strip()
+        return str(self.row["SolicitanteIngreso"]).strip().upper()
 
     def get_legal_quality_name(self):
-        return str(self.row["CalidadJuridica"]).strip()
+        return str(self.row["CalidadJuridica"]).strip().upper()
 
     def get_tribunal_name(self):
-        return str(self.row["Tribunal"]).strip()
+        return str(self.row["Tribunal"]).strip().upper()
 
     def get_proceedings(self):
-        return str(self.row["Expediente"]).strip()
+        return str(self.row["Expediente"]).strip().upper()
 
     def get_cause_of_entry(self):
-        return str(self.row["CausalIngreso_1"]).strip()
+        return str(self.row["CausalIngreso_1"]).strip().upper()
 
     def get_attention(self):
         return (

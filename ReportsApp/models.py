@@ -86,7 +86,7 @@ class NNA(models.Model):
             self.person_FK.delete()
         super().delete(*args, **kwargs)
 
-
+# Después quitar default datetime.now
 class Project(models.Model):
     code = models.IntegerField(unique=True)
     project_name = models.CharField(max_length=100)
@@ -118,7 +118,7 @@ class EntryDetails(models.Model):
 
 
 class ProjectExtension(models.Model):
-    extension = models.IntegerField(default=6)
+    extension = models.IntegerField()
     approved = models.BooleanField(default=False)
     date = models.DateField(auto_now_add=True)
     reason = models.TextField(max_length=1000)
