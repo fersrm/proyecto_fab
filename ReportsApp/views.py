@@ -87,7 +87,7 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
 
     def process_dataframe(self, df, user):
         error_list = []
-        with ThreadPoolExecutor(max_workers=6) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             futures = [
                 executor.submit(self.process_row, index, row, user, error_list)
                 for index, row in df.iterrows()
@@ -113,6 +113,7 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
             self.create_or_update_entry(adapter, nna, project)
         except Exception as e:
             cod_nna = adapter.get_cod_nna()
+            print(e)
             if "valor nulo en la columna" in str(e):
                 error_message = (
                     f"Error en la fila {index + 2}: El código NNA {cod_nna} no se pudo procesar porque falta un dato requerido en la columna. "
@@ -142,12 +143,20 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
         attention = adapter.get_attention()
         project_code = adapter.get_project_code()
         project_name = adapter.get_project_name()
+        date_project = adapter.get_date_project()
+        ability = adapter.get_ability_project()
+        duration = adapter.get_duration_project()
+        tipo_proyecto = adapter.get_tipo_proyecto()
 
         if project_code not in self.projects:
             self.projects[project_code] = Project.objects.create(
                 code=project_code,
                 project_name=project_name,
                 type_of_attention=attention,
+                date_project=date_project,
+                ability=ability,
+                duration=duration,
+                tipo_proyecto=tipo_proyecto,
                 location_FK=location,
                 institution_FK=institution,
             )

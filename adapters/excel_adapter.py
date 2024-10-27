@@ -93,3 +93,15 @@ class ExcelAdapter:
                 return False
             return True
         return False
+
+    def get_date_project(self):
+        return parse_date(self.row["Fecha de inicio"])
+
+    def get_ability_project(self):
+        return int(self.row["Capacidad"])
+
+    def get_duration_project(self):
+        return int(self.row["duracion en meses"])
+
+    def get_tipo_proyecto(self):
+        return str(self.row["tipo de programa"]).strip().upper()

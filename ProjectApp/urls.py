@@ -54,4 +54,9 @@ urlpatterns = [
         views.OnlyProjectExtensionUpdateView.as_view(),
         name="OnlyProjectExtensionEdit",
     ),
+    path(
+        "cupos_proyecto/",
+        views.ActiveProjectListView.as_view(),
+        name="ActiveProjectList",
+    ),
 ]

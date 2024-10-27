@@ -17,7 +17,7 @@ from django.views.generic import (
     DetailView,
 )
 from django.urls import reverse_lazy
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from .forms import (
     ProjectCreateForm,
     ProjectUpdateForm,
@@ -116,6 +116,86 @@ class ProjectDeleteView(LoginRequiredMixin, PermitsPositionMixin, DeleteView):
         messages.success(self.request, "Proyecto eliminado correctamente")
         self.object.delete()
         return redirect(self.get_success_url())
+
+
+###############################
+#####      CUPOS     ##########
+###############################
+from utils.tasks import desactivar_proyectos
+
+
+class ActiveProjectListView(ListView):
+    model = Project
+    template_name = "pages/proyectos/cupos_project_list.html"
+    context_object_name = "projects"
+    paginate_by = 7
+
+    def get_queryset(self):
+        # desactivar_proyectos()
+        projects = Project.objects.filter(active=True)
+        search_query = self.request.GET.get("search")
+
+        # Annotar cada proyecto con el número de NNA activos (con current_status=True)
+        projects = projects.annotate(
+            nna_activos=Count(
+                "entrydetails", filter=Q(entrydetails__current_status=True)
+            )
+        )
+
+        if search_query:
+            if search_query.isdigit():
+                projects = projects.filter(Q(code=search_query))
+            else:
+                projects = projects.filter(
+                    Q(project_name__icontains=search_query)
+                    | Q(institution_FK__institution_name__icontains=search_query)
+                    | Q(tipo_proyecto__icontains=search_query)
+                )
+
+        projects = projects.order_by("date_project")
+
+        return projects
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        paginator = Paginator(context["projects"], self.paginate_by)
+        page = self.request.GET.get("page")
+        project_page = paginator.get_page(page)
+        context["projects"] = project_page
+
+        for project in context["projects"]:
+            # Calcular los cupos disponibles
+            project.cupos_disponibles = project.ability - project.nna_activos
+
+            # Duración total del proyecto
+            total_base_duration = project.duration  # en meses
+            approved_project_extensions = project.onlyprojectextension_set.filter(
+                approved=True
+            )
+            total_project_extension_months = sum(
+                extension.extension for extension in approved_project_extensions
+            )
+            total_project_duration_months = (
+                total_base_duration + total_project_extension_months
+            )
+
+            # Fecha de inicio del proyecto
+            start_date = project.date_project
+            time_delta = relativedelta(timezone.now().date(), start_date)
+
+            # Total de meses desde el inicio del proyecto
+            months_since_start = (time_delta.years * 12) + time_delta.months
+            remaining_project_months = (
+                total_project_duration_months - months_since_start
+            )
+
+            # Agregar la información de meses restantes al proyecto
+            project.remaining_months = remaining_project_months
+
+        context["placeholder"] = (
+            "Buscar por código, nombre, institución, tipo de proyecto"
+        )
+        return context
 
 
 ###################################
@@ -365,7 +445,7 @@ class ProjectExtensionDetailView(LoginRequiredMixin, DetailView):
                     "total_extension": total_approved_extension_months,
                     "total_duration": total_duration,
                     "extensions": all_extensions,
-                    "validity":entry_details.current_status,
+                    "validity": entry_details.current_status,
                 }
             )
             print("*" * 30)
@@ -529,6 +609,12 @@ class OnlyProjectExtensionCreateView(LoginRequiredMixin, CreateView):
         project = get_object_or_404(Project, pk=self.kwargs["project_pk"])
         user = self.request.user
 
+        # Verificar si el proyecto está activo
+        if not project.active:
+            messages.error(self.request, "No se puede extender un proyecto inactivo.")
+            return redirect("OnlyProjectExtensionDetail", pk=self.kwargs["project_pk"])
+
+        # Asignar el proyecto y usuario al formulario
         form.instance.project_FK = project
         form.instance.user_FK = user
 

@@ -86,14 +86,23 @@ class NNA(models.Model):
             self.person_FK.delete()
         super().delete(*args, **kwargs)
 
+
 # Después quitar default datetime.now
 class Project(models.Model):
+    TIPOS_PROYECTOS = [
+        ("ABUSO", "Abuso"),
+        ("RIESGO VITAL", "Riesgo vital"),
+    ]
     code = models.IntegerField(unique=True)
     project_name = models.CharField(max_length=100)
     type_of_attention = models.BooleanField(default=True)
     date_project = models.DateField(default=datetime.now)
     ability = models.IntegerField(default=30)
     duration = models.IntegerField(default=12)
+    tipo_proyecto = models.CharField(
+        max_length=20, choices=TIPOS_PROYECTOS, default="ABUSO"
+    )
+    active = models.BooleanField(default=False)
     institution_FK = models.ForeignKey(
         Institution, on_delete=models.CASCADE, related_name="projects"
     )

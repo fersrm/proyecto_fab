@@ -1,9 +1,17 @@
 from django.db.models import Sum
-from ReportsApp.models import Notification, NNA, ProjectExtension, Project, EntryDetails
+from ReportsApp.models import (
+    Notification,
+    NNA,
+    ProjectExtension,
+    Project,
+    EntryDetails,
+    OnlyProjectExtension,
+)
 from concurrent.futures import ThreadPoolExecutor
 from celery import shared_task
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
+from datetime import date
 
 
 def alertas_nna_proyecto(nna, project):
@@ -69,7 +77,7 @@ def alertas_nna_proyecto(nna, project):
 
 @shared_task
 def generar_alertas_nna_proyectos():
-    with ThreadPoolExecutor(max_workers=6) as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:
         for nna in NNA.objects.all():
             nna_projects = Project.objects.filter(entrydetails__nna_FK=nna).distinct()
             # Ejecutar en paralelo para cada proyecto del NNA
@@ -79,3 +87,37 @@ def generar_alertas_nna_proyectos():
             ]
             for future in futures:
                 future.result()
+
+
+def desactivar_proyectos():
+    projects = Project.objects.all()
+
+    for project in projects:
+        # Sumar extensiones aprobadas
+        total_extension = (
+            OnlyProjectExtension.objects.filter(project_FK=project, approved=True)
+            .aggregate(total_extension=Sum("extension"))
+            .get("total_extension")
+            or 0
+        )
+
+        # Calcular duración total del proyecto
+        total_duration = project.duration + total_extension
+
+        # Calcular la fecha final real del proyecto usando relativedelta para sumar meses
+        fecha_final_proyecto = project.date_project + relativedelta(
+            months=total_duration
+        )
+
+        # Imprimir para depuración
+        print(f"fecha_final_proyecto {fecha_final_proyecto}")
+        print(f"hoy {date.today()}")
+
+        # Desactivar si la fecha final del proyecto es menor que la fecha actual
+        if fecha_final_proyecto < date.today():
+            project.active = False
+        else:
+            project.active = True
+
+        # Guardar cambios en el proyecto
+        project.save()

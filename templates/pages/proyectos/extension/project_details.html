@@ -15,8 +15,12 @@
             <p class="text-sm font-medium text-gray-900">Veces extendido: {{ project_details.extension_count }}</p>
             <p class="text-sm font-medium text-gray-900">Duración Base: {{ project_details.base_duration }}</p>
             <p class="text-sm font-medium text-gray-900">Total: {{ project_details.total_duration }} meses</p>
-            {% url 'OnlyProjectExtensionCreate' project.pk as project_list_url %}
-            {% include "components/btn/ancor_btn.html" with ancor_link=project_list_url button_text="Extender Proyecto" %} 
+            {% if project.active %}  
+              {% url 'OnlyProjectExtensionCreate' project.pk as project_list_url %}
+              {% include "components/btn/ancor_btn.html" with ancor_link=project_list_url button_text="Extender Proyecto" %} 
+            {% else %}
+              <strong>No se puede extender un proyecto inactivo.</strong>
+            {% endif %}
 
             {% if project_details.extension_count > 0 %}
 
