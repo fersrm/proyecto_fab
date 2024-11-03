@@ -113,7 +113,6 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
             self.create_or_update_entry(adapter, nna, project)
         except Exception as e:
             cod_nna = adapter.get_cod_nna()
-            print(e)
             if "valor nulo en la columna" in str(e):
                 error_message = (
                     f"Error en la fila {index + 2}: El código NNA {cod_nna} no se pudo procesar porque falta un dato requerido en la columna. "
@@ -283,7 +282,9 @@ class ReportNnaListView(LoginRequiredMixin, ListView):
     paginate_by = 8
 
     def get_queryset(self):
-        queryset = super().get_queryset().order_by("cod_nna")
+        queryset = (
+            super().get_queryset().filter(not_in_project=False).order_by("cod_nna")
+        )
         search_query = self.request.GET.get("search")
 
         if search_query:
@@ -618,7 +619,9 @@ class ReportListDateView(LoginRequiredMixin, ListView):
     paginate_by = 8
 
     def get_queryset(self):
-        queryset = super().get_queryset().order_by("cod_nna")
+        queryset = (
+            super().get_queryset().filter(not_in_project=False).order_by("cod_nna")
+        )
         search_query = self.request.GET.get("search")
 
         latest_entry = EntryDetails.objects.filter(nna_FK=OuterRef("pk")).order_by(

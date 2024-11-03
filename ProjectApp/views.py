@@ -122,6 +122,7 @@ class ProjectDeleteView(LoginRequiredMixin, PermitsPositionMixin, DeleteView):
 #####      CUPOS     ##########
 ###############################
 from utils.tasks import desactivar_proyectos
+from ListaEsperaApp.models import NNAEntrante
 
 
 class ActiveProjectListView(ListView):
@@ -142,6 +143,7 @@ class ActiveProjectListView(ListView):
             )
         )
 
+        # Filtro de búsqueda
         if search_query:
             if search_query.isdigit():
                 projects = projects.filter(Q(code=search_query))
@@ -191,6 +193,14 @@ class ActiveProjectListView(ListView):
 
             # Agregar la información de meses restantes al proyecto
             project.remaining_months = remaining_project_months
+
+            # Obtener el número de solicitantes que coincidan con el tipo de proyecto y la región
+            solicitantes_count = NNAEntrante.objects.filter(
+                tipo_proyecto=project.tipo_proyecto,
+                nna_FK__location_FK__region=project.location_FK.region,
+            ).count()
+
+            project.solicitantes = solicitantes_count
 
         context["placeholder"] = (
             "Buscar por código, nombre, institución, tipo de proyecto"

@@ -40,7 +40,7 @@ class DocumentPdfListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         if (
             self.request.user.is_authenticated
-            and self.request.user.profile.position_FK.id != 3
+            and self.request.user.profile.position_FK.permission_code != "RESTRICTED"
         ):
             return DocumentPDF.objects.all()
         return DocumentPDF.objects.filter(state=True)

@@ -77,6 +77,7 @@ class NNA(models.Model):
     legal_FK = models.ForeignKey(Legal, on_delete=models.SET_NULL, null=True)
     registration_date = models.DateTimeField(auto_now_add=True)
     user_FK = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    not_in_project = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.person_FK.name)

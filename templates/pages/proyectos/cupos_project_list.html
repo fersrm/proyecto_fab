@@ -22,6 +22,7 @@
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Tipo Atención</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Duración Restante</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Cupos</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">solicitantes</th>
             <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Comuna</th>
             {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
               <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Acciones</th>
@@ -54,6 +55,9 @@
             </td>
             <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
               {{ project.cupos_disponibles }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ project.solicitantes }}
             </td>
             <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
               {{ project.location_FK.commune }}

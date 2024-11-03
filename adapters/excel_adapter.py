@@ -3,18 +3,11 @@ from datetime import datetime
 import pandas as pd
 
 
-class ExcelAdapter:
+class ExcelBaseAdapter:
     def __init__(self, row):
         self.row = row
 
-    def get_institution_name(self):
-        return str(self.row["institucion"]).strip().upper()
-
-    def get_project_code(self):
-        return int(self.row["CodProyecto"])
-
-    def get_project_name(self):
-        return str(self.row["proyecto"]).strip().upper()
+    # Métodos comunes a todos los adaptadores
 
     def get_rut(self):
         return str(self.row["rut"]).strip().upper()
@@ -64,6 +57,23 @@ class ExcelAdapter:
     def get_cause_of_entry(self):
         return str(self.row["CausalIngreso_1"]).strip().upper()
 
+    def get_cod_nna(self):
+        return int(self.row["codNNA"])
+
+    def get_tipo_proyecto(self):
+        return str(self.row["tipo de programa"]).strip().upper()
+
+
+class ExcelAdapter(ExcelBaseAdapter):
+    def get_institution_name(self):
+        return str(self.row["institucion"]).strip().upper()
+
+    def get_project_code(self):
+        return int(self.row["CodProyecto"])
+
+    def get_project_name(self):
+        return str(self.row["proyecto"]).strip().upper()
+
     def get_attention(self):
         return (
             True
@@ -71,18 +81,13 @@ class ExcelAdapter:
             else False
         )
 
-    def get_cod_nna(self):
-        return int(self.row["codNNA"])
-
     def get_admission_date(self):
         return parse_date(self.row["fechaingreso"])
 
     def get_discharge_date(self):
-        return (
-            parse_date(self.row["fechaegreso"])
-            if not pd.isnull(self.row["fechaegreso"]) and self.row["fechaegreso"] != ""
-            else None
-        )
+        if not pd.isnull(self.row["fechaegreso"]) and self.row["fechaegreso"] != "":
+            return parse_date(self.row["fechaegreso"])
+        return None
 
     def get_current(self):
         is_active = str(self.row["vigencia"]).strip().lower() == "si"
@@ -103,5 +108,10 @@ class ExcelAdapter:
     def get_duration_project(self):
         return int(self.row["duracion en meses"])
 
-    def get_tipo_proyecto(self):
-        return str(self.row["tipo de programa"]).strip().upper()
+
+class ExcelAdapterApplicants(ExcelBaseAdapter):
+    def get_date_of_application(self):
+        return parse_date(self.row["Fecha de Solicitud"])
+
+    def get_priority(self):
+        return int(self.row["Prioridad"])

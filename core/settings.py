@@ -37,6 +37,7 @@ LOCAL_APPS = [
     "DocumentoApp",
     "ReportsApp",
     "ProjectApp",
+    "ListaEsperaApp",
 ]
 
 THIRD_APPS = [
