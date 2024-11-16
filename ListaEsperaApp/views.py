@@ -1,4 +1,4 @@
-from django.views.generic import ListView, DetailView, FormView
+from django.views.generic import ListView, DetailView, FormView, DeleteView
 from .models import NNAEntrante, PriorityHistory
 from ReportsApp.models import (
     Person,
@@ -8,6 +8,7 @@ from ReportsApp.models import (
     Tribunal,
     Legal,
     NNA,
+    Project,
 )
 from django.shortcuts import redirect
 from .forms import ReportForm
@@ -16,8 +17,15 @@ from django.urls import reverse_lazy
 import pandas as pd
 from django.db import transaction
 from adapters.excel_adapter import ExcelAdapterApplicants
-from django.shortcuts import get_object_or_404
 from django.http import Http404
+from django.db.models import Count, Q
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+from django.core.paginator import Paginator
+
+# Premiosos
+from django.contrib.auth.mixins import LoginRequiredMixin
+from core.mixins import PermitsPositionMixin
 
 # Create your views here.
 
@@ -26,7 +34,7 @@ class ApplicantsFormView(FormView):
     model = NNA
     form_class = ReportForm
     template_name = "pages/nna_entrantes/carga_excel.html"
-    success_url = reverse_lazy("ApplicantsList")
+    success_url = reverse_lazy("ApplicantsRegionList")
 
     def form_valid(self, form):
         document = form.cleaned_data["document"]
@@ -43,7 +51,7 @@ class ApplicantsFormView(FormView):
                     messages.error(self.request, error, extra_tags="excel_error")
 
             messages.success(self.request, "Documento Cargado")
-            return redirect("ApplicantsList")
+            return redirect("ApplicantsRegionList")
         except Exception as e:
             print(e)
             messages.error(self.request, "Error al procesar el documento")
@@ -210,12 +218,24 @@ class SolicitudesPorProyectoListView(ListView):
     model = NNAEntrante
     template_name = "pages/nna_entrantes/solicitudes.html"
     context_object_name = "solicitantes"
+    paginate_by = 7
 
     def get_queryset(self):
-        # Obtiene todas las solicitudes de NNAEntrante y las ordena por prioridad y fecha de aplicación
-        return NNAEntrante.objects.select_related("nna_FK__person_FK").order_by(
-            "priority", "date_of_application"
+        # Obtener el parámetro de la región desde la URL
+        region_id = self.kwargs.get("region_id")
+        # Filtrar los solicitantes en la región específica y ordenar por prioridad y fecha
+        return (
+            NNAEntrante.objects.select_related("nna_FK__person_FK")
+            .filter(nna_FK__location_FK__region=region_id)
+            .order_by("priority", "date_of_application")
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        paginator = Paginator(context["solicitantes"], self.paginate_by)
+        page = self.request.GET.get("page")
+        context["solicitantes"] = paginator.get_page(page)
+        return context
 
 
 class HistorialSolicitanteDetailView(DetailView):
@@ -255,3 +275,132 @@ class HistorialSolicitanteDetailView(DetailView):
         context["history_by_nna_entrante"] = history_by_project_type
 
         return context
+
+
+class SolicitantesPorRegionView(ListView):
+    model = Location
+    template_name = "pages/nna_entrantes/solicitantes_por_region.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        def get_region_display(region_code):
+            for code, name in Location.REGION_CHOICES:
+                if code == region_code:
+                    return name
+            return "Región desconocida"
+
+        # Contar solicitantes agrupados por región y tipo de proyecto
+        solicitantes_por_region_y_tipo = (
+            NNAEntrante.objects.values("nna_FK__location_FK__region", "tipo_proyecto")
+            .annotate(solicitantes_count=Count("id"))
+            .order_by("nna_FK__location_FK__region", "tipo_proyecto")
+        )
+
+        # Obtener proyectos activos agrupados por región y tipo de proyecto
+        proyectos_activos = Project.objects.filter(active=True).annotate(
+            nna_activos=Count(
+                "entrydetails", filter=Q(entrydetails__current_status=True)
+            )
+        )
+
+        # Diccionario para almacenar información sobre los proyectos y cupos por región y tipo de proyecto
+        proyectos_por_region_y_tipo = {}
+
+        for proyecto in proyectos_activos:
+            region = proyecto.location_FK.region
+            tipo_proyecto = proyecto.tipo_proyecto
+
+            # Calcular los cupos disponibles
+            proyecto.cupos_disponibles = proyecto.ability - proyecto.nna_activos
+
+            # Calcular el tiempo restante de vigencia del proyecto
+            total_base_duration = proyecto.duration  # en meses
+            approved_extensions = proyecto.onlyprojectextension_set.filter(
+                approved=True
+            )
+            total_extension_months = sum(
+                extension.extension for extension in approved_extensions
+            )
+            total_duration = total_base_duration + total_extension_months
+
+            # Fecha de inicio del proyecto
+            start_date = proyecto.date_project
+            time_delta = relativedelta(timezone.now().date(), start_date)
+
+            months_since_start = (time_delta.years * 12) + time_delta.months
+
+            proyecto.remaining_months = total_duration - months_since_start
+
+            # Agrupar proyectos por región y tipo de proyecto
+            if region not in proyectos_por_region_y_tipo:
+                proyectos_por_region_y_tipo[region] = {}
+            if tipo_proyecto not in proyectos_por_region_y_tipo[region]:
+                proyectos_por_region_y_tipo[region][tipo_proyecto] = []
+            proyectos_por_region_y_tipo[region][tipo_proyecto].append(proyecto)
+
+        # Crear una estructura de datos para el contexto con la información de cada región y tipo de proyecto
+        regiones_info = []
+        for item in solicitantes_por_region_y_tipo:
+            region = item["nna_FK__location_FK__region"]
+            tipo_proyecto = item["tipo_proyecto"]
+            solicitantes_count = item["solicitantes_count"]
+            proyectos_info = proyectos_por_region_y_tipo.get(region, {}).get(
+                tipo_proyecto, []
+            )
+
+            # Total de cupos disponibles para este tipo de proyecto en la región
+            cupos_disponibles_total = sum(
+                proy.cupos_disponibles for proy in proyectos_info
+            )
+
+            # Proyectos con cupos disponibles
+            proyectos_con_cupos = [
+                proy for proy in proyectos_info if proy.cupos_disponibles > 0
+            ]
+            proyectos_con_cupos_info = [
+                {
+                    "proyecto": proy,
+                    "cupos_disponibles": proy.cupos_disponibles,
+                    "remaining_months": proy.remaining_months,
+                    "region": region,
+                }
+                for proy in proyectos_con_cupos
+            ]
+
+            # Determinar cuántos solicitantes quedan sin cupo
+            solicitantes_sin_cupo = max(0, solicitantes_count - cupos_disponibles_total)
+
+            # Añadir la información al contexto
+            regiones_info.append(
+                {
+                    "region": region,
+                    "region_name": get_region_display(region),
+                    "tipo_proyecto": tipo_proyecto,
+                    "solicitantes_count": solicitantes_count,
+                    "proyectos_info": proyectos_con_cupos_info,
+                    "solicitantes_sin_cupo": solicitantes_sin_cupo,
+                }
+            )
+
+        # Obtener los cinco tipos de proyecto con mayor demanda sin cupo en todas las regiones
+        sin_cupo = [tipo for tipo in regiones_info if tipo["solicitantes_sin_cupo"] > 0]
+        sin_cupo_ordenados = sorted(
+            sin_cupo, key=lambda x: x["solicitantes_sin_cupo"], reverse=True
+        )[:5]
+
+        context["regiones_info"] = regiones_info
+        context["sin_cupo_mayores"] = sin_cupo_ordenados
+        return context
+
+
+class SolicitanteDeleteView(LoginRequiredMixin, PermitsPositionMixin, DeleteView):
+    model = NNA
+    success_url = reverse_lazy("ApplicantsRegionList")
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        messages.success(self.request, "Solicitante eliminado correctamente")
+        self.object.delete()
+        return redirect(self.get_success_url())

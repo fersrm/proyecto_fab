@@ -63,7 +63,6 @@ class PriorityHistory(models.Model):
     old_date = models.DateTimeField(default=timezone.now)
     changed_date = models.DateTimeField(default=timezone.now)
     tipo_proyecto = models.CharField(max_length=20)
-    
 
     def __str__(self):
         return f"Cambio de prioridad de {self.old_priority} a {self.new_priority} en {self.changed_date}"

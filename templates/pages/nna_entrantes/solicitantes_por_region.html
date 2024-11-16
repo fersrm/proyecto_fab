@@ -1,0 +1,85 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+
+{% block content_main %}  
+
+  <div class="flex min-h-full flex-col justify-center sm:px-6 lg:px-8">
+
+    {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
+      <div x-data="{ modelOpen: false }" id="addModal">
+        <button @click="modelOpen =!modelOpen" class="flex items-center justify-center px-3 py-2 space-x-2 text-sm tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-500 rounded-md dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:bg-indigo-700 hover:bg-indigo-600 focus:outline-none focus:bg-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 mb-5" id="openModalButton"  onclick="abrir_modal_documento('{% url 'Applicants' %}')">
+          <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          <span>Agregar Documento</span>
+        </button>
+        {% include "components/modal/modal.html" %}
+      </div>
+    {% endif %}
+
+    <div class="sm:mx-auto sm:w-full">
+      <div class="bg-white px-6 py-10 shadow rounded-lg sm:px-12">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Solicitantes y Cupos por Región</h2>
+
+        {% for region_info in regiones_info %}
+          <div class="mb-10 border-b border-gray-300 pb-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">
+              Tipo de Proyecto: {{ region_info.tipo_proyecto }} ({{ region_info.region_name }})
+            </h3>
+            <p class="text-gray-600">Total Solicitantes: <span class="font-semibold">{{ region_info.solicitantes_count }}</span></p>
+
+            {% if region_info.proyectos_info %}
+              <p class="text-lg font-semibold text-gray-700 mt-4">Proyectos con Cupos Disponibles:</p>
+              <ul class="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
+                {% for proyecto_info in region_info.proyectos_info %}
+                  <li class="p-5 border border-gray-200 rounded-lg bg-gray-50">
+                    <p class="text-gray-800 font-medium">Proyecto: {{ proyecto_info.proyecto.project_name }}</p>
+                    <p class="text-gray-600">Cupos Disponibles: <span class="font-semibold">{{ proyecto_info.cupos_disponibles }}</span></p>
+                    <p class="text-gray-600">Vigencia Restante: {{ proyecto_info.remaining_months }} meses</p>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <strong class="mt-4">No hay proyectos con cupos disponibles para este tipo de proyecto.</strong>
+            {% endif %}
+
+            <div class="flex items-center justify-between mt-6">
+              <p class="text-gray-600">Solicitantes sin cupo: <span class="font-semibold">{{ region_info.solicitantes_sin_cupo }}</span></p>
+              <a href="{% url 'ApplicantsList' region_info.region %}"
+                class="flex items-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
+                {% include "components/svg/svg_extender.html" %}
+                <span class="ml-2">Ver detalles</span>
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Tipos de Proyecto con Mayor Demanda sin Cupos</h2>
+        <ul class="space-y-4">
+          {% for tipo_info in sin_cupo_mayores %}
+            <li class="p-5 bg-gray-50 border border-gray-200 rounded-lg">
+              <p class="text-gray-800 font-medium">Tipo de Proyecto: {{ tipo_info.tipo_proyecto }}</p>
+              <p class="text-gray-600">{{ tipo_info.region_name }}</p>
+              <p class="text-gray-600">Solicitantes sin cupo: <span class="font-semibold">{{ tipo_info.solicitantes_sin_cupo }}</span></p>
+              <a href="{% url 'ApplicantsList' tipo_info.region %}"
+                class="flex w-44 items-center rounded-md bg-indigo-500 px-4 py-2 mt-3 text-sm font-semibold text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
+                {% include "components/svg/svg_extender.html" %}
+                <span class="ml-2">Ver detalles</span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  {% include 'components/mensajes.html' %} 
+
+  {% include "pages/reportes_nna/components/mensajes_excel.html" %}
+
+{% endblock content_main %}
+
+{% block javascript %}
+  <script defer src="{% static 'js/carga_documento.js' %}"></script>
+  <script defer src="{% static "js/show_form.js" %}"></script>
+{% endblock javascript %}

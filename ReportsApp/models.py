@@ -28,8 +28,27 @@ class Person(models.Model):
 
 # unique=True a comuna ahora no se puede por la forma del Excel
 class Location(models.Model):
-    region = models.IntegerField()
-    commune = models.CharField(max_length=100)
+    REGION_CHOICES = [
+        (15, "Región de Arica y Parinacota"),
+        (1, "Región de Tarapacá"),
+        (2, "Región de Antofagasta"),
+        (3, "Región de Atacama"),
+        (4, "Región de Coquimbo"),
+        (5, "Región de Valparaíso"),
+        (13, "Región Metropolitana de Santiago"),
+        (6, "Región del Libertador General Bernardo O'Higgins"),
+        (7, "Región del Maule"),
+        (16, "Región de Ñuble"),
+        (8, "Región del Biobío"),
+        (9, "Región de La Araucanía"),
+        (14, "Región de Los Ríos"),
+        (10, "Región de Los Lagos"),
+        (11, "Región de Aysén del General Carlos Ibáñez del Campo"),
+        (12, "Región de Magallanes y de la Antártica Chilena"),
+    ]
+
+    region = models.IntegerField(choices=REGION_CHOICES)
+    commune = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.commune
