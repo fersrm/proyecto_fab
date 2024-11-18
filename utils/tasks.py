@@ -7,6 +7,7 @@ from ReportsApp.models import (
     EntryDetails,
     OnlyProjectExtension,
 )
+from ListaEsperaApp.models import NNAEntrante, PriorityHistory
 from concurrent.futures import ThreadPoolExecutor
 from celery import shared_task
 from django.utils import timezone
@@ -89,6 +90,7 @@ def generar_alertas_nna_proyectos():
                 future.result()
 
 
+@shared_task
 def desactivar_proyectos():
     projects = Project.objects.all()
 
@@ -121,3 +123,103 @@ def desactivar_proyectos():
 
         # Guardar cambios en el proyecto
         project.save()
+
+
+@shared_task
+def actualizar_rankings_task():
+    """Task de Celery para actualizar los rankings de todos los solicitantes agrupados por comuna y tipo de proyecto."""
+
+    solicitantes = NNAEntrante.objects.all().select_related("nna_FK__location_FK")
+
+    grupos = {}
+    for solicitante in solicitantes:
+        comuna_id = solicitante.nna_FK.location_FK.id
+        tipo_proyecto = solicitante.tipo_proyecto
+
+        # Si la clave comuna_id, tipo_proyecto no existe en el diccionario, agregarla
+        if (comuna_id, tipo_proyecto) not in grupos:
+            grupos[(comuna_id, tipo_proyecto)] = []
+
+        # Agregar el solicitante al grupo correspondiente
+        grupos[(comuna_id, tipo_proyecto)].append(solicitante)
+
+    # Para cada grupo, ordenar y actualizar los rankings
+    for (comuna_id, tipo_proyecto), solicitantes_grupo in grupos.items():
+        # Ordenar los solicitantes por prioridad (más alta primero) y luego por fecha
+        solicitantes_grupo = sorted(
+            solicitantes_grupo, key=lambda x: (-x.priority, x.date_of_application)
+        )
+
+        # Actualizar el ranking de cada solicitante
+        for idx, solicitante in enumerate(solicitantes_grupo, start=1):
+            solicitante.ranking = idx
+            solicitante.save(update_fields=["ranking"])
+
+    return "Rankings actualizados para todos los solicitantes por comuna y tipo de proyecto."
+
+
+@shared_task
+def reorganizar_historial_prioridades_task():
+    """Reorganiza el historial de prioridades en la base de datos para cada NNAEntrante según el tipo de proyecto."""
+    nna_entrantes = NNAEntrante.objects.all()
+
+    for nna in nna_entrantes:
+        # Filtrar historiales asociados al NNAEntrante
+        history = PriorityHistory.objects.filter(nna_entrante_FK=nna)
+
+        if not history.exists():
+            print(f"No hay historial para el NNAEntrante con ID {nna.id}")
+            continue
+
+        # Agrupar por tipo de proyecto
+        tipos_proyectos = history.values_list("tipo_proyecto", flat=True).distinct()
+
+        for tipo in tipos_proyectos:
+            # Filtrar historial por tipo de proyecto
+            history_por_tipo = history.filter(tipo_proyecto=tipo)
+
+            # Crear un set con todas las fechas y prioridades
+            fechas_prioridades = set()
+            for record in history_por_tipo:
+                fechas_prioridades.add((record.old_date, record.old_priority))
+                fechas_prioridades.add((record.changed_date, record.new_priority))
+
+            # Ordenar por fecha
+            fechas_prioridades_ordenadas = sorted(
+                fechas_prioridades, key=lambda x: x[0]
+            )
+
+            if fechas_prioridades_ordenadas:
+                # Obtener el último registro
+                last_date, last_priority = fechas_prioridades_ordenadas[-1]
+
+                # Actualizar NNAEntrante con los últimos datos
+                nna.date_of_application = last_date
+                nna.priority = last_priority
+                nna.save()
+
+            # Eliminar el historial actual para este tipo de proyecto
+            history_por_tipo.delete()
+
+            # Reorganizar los datos y guardarlos en la tabla
+            print(
+                f"Actualizando la tabla PriorityHistory para el tipo de proyecto: {tipo}..."
+            )
+            for i in range(len(fechas_prioridades_ordenadas) - 1):
+                old_date, old_priority = fechas_prioridades_ordenadas[i]
+                changed_date, new_priority = fechas_prioridades_ordenadas[i + 1]
+
+                PriorityHistory.objects.create(
+                    nna_entrante_FK=nna,
+                    tipo_proyecto=tipo,
+                    old_date=old_date,
+                    old_priority=old_priority,
+                    changed_date=changed_date,
+                    new_priority=new_priority,
+                )
+
+                print(
+                    f"Guardado para tipo proyecto '{tipo}': {old_date} ({old_priority}) -> {changed_date} ({new_priority})"
+                )
+
+    print("Reorganización completa.")

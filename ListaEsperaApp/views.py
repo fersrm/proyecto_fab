@@ -196,7 +196,7 @@ class ApplicantsFormView(FormView):
 
             if (
                 nna_entrante.priority != priority
-                and date_of_application > nna_entrante.date_of_application
+                and date_of_application != nna_entrante.date_of_application
             ):
                 nna_entrante.update_priority(priority, date_of_application)
         else:
@@ -214,6 +214,10 @@ class ApplicantsFormView(FormView):
         return redirect("ApplicantsList")
 
 
+###################################
+from utils.tasks import actualizar_rankings_task, reorganizar_historial_prioridades_task
+
+
 class SolicitudesPorProyectoListView(ListView):
     model = NNAEntrante
     template_name = "pages/nna_entrantes/solicitudes.html"
@@ -221,13 +225,16 @@ class SolicitudesPorProyectoListView(ListView):
     paginate_by = 7
 
     def get_queryset(self):
+        actualizar_rankings_task()
+        reorganizar_historial_prioridades_task()
         # Obtener el parámetro de la región desde la URL
-        region_id = self.kwargs.get("region_id")
+        commune_id = self.kwargs.get("commune_id")
+        tipo_proyecto = self.kwargs.get("proyecto")
         # Filtrar los solicitantes en la región específica y ordenar por prioridad y fecha
         return (
             NNAEntrante.objects.select_related("nna_FK__person_FK")
-            .filter(nna_FK__location_FK__region=region_id)
-            .order_by("priority", "date_of_application")
+            .filter(nna_FK__location_FK=commune_id, tipo_proyecto=tipo_proyecto)
+            .order_by("-priority", "date_of_application")
         )
 
     def get_context_data(self, **kwargs):
@@ -255,7 +262,6 @@ class HistorialSolicitanteDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         solicitantes = self.get_object()
-
         # Obtener el nombre del NNA (solo una vez, del primer solicitante)
         context["solicitante_name"] = solicitantes.first().nna_FK.person_FK.name
 
@@ -273,125 +279,198 @@ class HistorialSolicitanteDetailView(DetailView):
                 history_by_project_type[tipo_proyecto].append(entry)
 
         context["history_by_nna_entrante"] = history_by_project_type
-
         return context
 
 
 class SolicitantesPorRegionView(ListView):
     model = Location
-    template_name = "pages/nna_entrantes/solicitantes_por_region.html"
+    template_name = "pages/nna_entrantes/solicitantes_por_comuna.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        def get_region_display(region_code):
-            for code, name in Location.REGION_CHOICES:
-                if code == region_code:
-                    return name
-            return "Región desconocida"
-
-        # Contar solicitantes agrupados por región y tipo de proyecto
-        solicitantes_por_region_y_tipo = (
-            NNAEntrante.objects.values("nna_FK__location_FK__region", "tipo_proyecto")
-            .annotate(solicitantes_count=Count("id"))
-            .order_by("nna_FK__location_FK__region", "tipo_proyecto")
+        # Datos procesados
+        context["regiones_info"] = self._obtener_regiones_info()
+        context["comunas_por_region"] = self._obtener_comunas_por_region(
+            context["regiones_info"]
         )
 
-        # Obtener proyectos activos agrupados por región y tipo de proyecto
+        return context
+
+    def _obtener_regiones_info(self):
+        """Construye la estructura principal de regiones_info."""
+        solicitantes_por_region_comuna_y_tipo = (
+            NNAEntrante.objects.values(
+                "nna_FK__location_FK__region",
+                "nna_FK__location_FK__commune",
+                "nna_FK__location_FK__id",
+                "tipo_proyecto",
+            )
+            .annotate(solicitantes_count=Count("id"))
+            .order_by(
+                "nna_FK__location_FK__region",
+                "nna_FK__location_FK__commune",
+                "tipo_proyecto",
+            )
+        )
+
+        proyectos_activos = self._obtener_proyectos_activos()
+        proyectos_por_region_comuna_y_tipo = self._organizar_proyectos_por_region(
+            proyectos_activos
+        )
+
+        regiones_info = []
+        for item in solicitantes_por_region_comuna_y_tipo:
+            self._procesar_solicitantes(
+                item, regiones_info, proyectos_por_region_comuna_y_tipo
+            )
+        return regiones_info
+
+    def _obtener_proyectos_activos(self):
+        """Obtiene proyectos activos y calcula cupos y duración restante."""
         proyectos_activos = Project.objects.filter(active=True).annotate(
             nna_activos=Count(
                 "entrydetails", filter=Q(entrydetails__current_status=True)
             )
         )
 
-        # Diccionario para almacenar información sobre los proyectos y cupos por región y tipo de proyecto
-        proyectos_por_region_y_tipo = {}
-
         for proyecto in proyectos_activos:
-            region = proyecto.location_FK.region
-            tipo_proyecto = proyecto.tipo_proyecto
-
-            # Calcular los cupos disponibles
             proyecto.cupos_disponibles = proyecto.ability - proyecto.nna_activos
 
-            # Calcular el tiempo restante de vigencia del proyecto
-            total_base_duration = proyecto.duration  # en meses
-            approved_extensions = proyecto.onlyprojectextension_set.filter(
-                approved=True
+            total_duration = proyecto.duration + sum(
+                ext.extension
+                for ext in proyecto.onlyprojectextension_set.filter(approved=True)
             )
-            total_extension_months = sum(
-                extension.extension for extension in approved_extensions
+            months_since_start = self._calcular_meses_desde_inicio(
+                proyecto.date_project
             )
-            total_duration = total_base_duration + total_extension_months
+            proyecto.remaining_months = max(0, total_duration - months_since_start)
 
-            # Fecha de inicio del proyecto
-            start_date = proyecto.date_project
-            time_delta = relativedelta(timezone.now().date(), start_date)
+        return proyectos_activos
 
-            months_since_start = (time_delta.years * 12) + time_delta.months
-
-            proyecto.remaining_months = total_duration - months_since_start
-
-            # Agrupar proyectos por región y tipo de proyecto
-            if region not in proyectos_por_region_y_tipo:
-                proyectos_por_region_y_tipo[region] = {}
-            if tipo_proyecto not in proyectos_por_region_y_tipo[region]:
-                proyectos_por_region_y_tipo[region][tipo_proyecto] = []
-            proyectos_por_region_y_tipo[region][tipo_proyecto].append(proyecto)
-
-        # Crear una estructura de datos para el contexto con la información de cada región y tipo de proyecto
-        regiones_info = []
-        for item in solicitantes_por_region_y_tipo:
-            region = item["nna_FK__location_FK__region"]
-            tipo_proyecto = item["tipo_proyecto"]
-            solicitantes_count = item["solicitantes_count"]
-            proyectos_info = proyectos_por_region_y_tipo.get(region, {}).get(
-                tipo_proyecto, []
+    def _organizar_proyectos_por_region(self, proyectos):
+        """Agrupa los proyectos por región, comuna y tipo."""
+        proyectos_por_region = {}
+        for proyecto in proyectos:
+            region, comuna, tipo = (
+                proyecto.location_FK.region,
+                proyecto.location_FK.commune,
+                proyecto.tipo_proyecto,
             )
 
-            # Total de cupos disponibles para este tipo de proyecto en la región
-            cupos_disponibles_total = sum(
-                proy.cupos_disponibles for proy in proyectos_info
-            )
+            if region not in proyectos_por_region:
+                proyectos_por_region[region] = {}
+            if comuna not in proyectos_por_region[region]:
+                proyectos_por_region[region][comuna] = {}
+            if tipo not in proyectos_por_region[region][comuna]:
+                proyectos_por_region[region][comuna][tipo] = []
 
-            # Proyectos con cupos disponibles
-            proyectos_con_cupos = [
-                proy for proy in proyectos_info if proy.cupos_disponibles > 0
-            ]
-            proyectos_con_cupos_info = [
-                {
-                    "proyecto": proy,
-                    "cupos_disponibles": proy.cupos_disponibles,
-                    "remaining_months": proy.remaining_months,
-                    "region": region,
-                }
-                for proy in proyectos_con_cupos
-            ]
+            proyectos_por_region[region][comuna][tipo].append(proyecto)
+        return proyectos_por_region
 
-            # Determinar cuántos solicitantes quedan sin cupo
-            solicitantes_sin_cupo = max(0, solicitantes_count - cupos_disponibles_total)
+    def _procesar_solicitantes(self, item, regiones_info, proyectos_por_region):
+        region, comuna, comuna_id, tipo, count = (
+            item["nna_FK__location_FK__region"],
+            item["nna_FK__location_FK__commune"],
+            item["nna_FK__location_FK__id"],  # ID de la comuna
+            item["tipo_proyecto"],
+            item["solicitantes_count"],
+        )
 
-            # Añadir la información al contexto
-            regiones_info.append(
-                {
-                    "region": region,
-                    "region_name": get_region_display(region),
-                    "tipo_proyecto": tipo_proyecto,
-                    "solicitantes_count": solicitantes_count,
-                    "proyectos_info": proyectos_con_cupos_info,
-                    "solicitantes_sin_cupo": solicitantes_sin_cupo,
-                }
-            )
+        proyectos_info = (
+            proyectos_por_region.get(region, {}).get(comuna, {}).get(tipo, [])
+        )
+        cupos_disponibles = sum(proy.cupos_disponibles for proy in proyectos_info)
+        solicitantes_sin_cupo = max(0, count - cupos_disponibles)
 
-        # Obtener los cinco tipos de proyecto con mayor demanda sin cupo en todas las regiones
-        sin_cupo = [tipo for tipo in regiones_info if tipo["solicitantes_sin_cupo"] > 0]
-        sin_cupo_ordenados = sorted(
-            sin_cupo, key=lambda x: x["solicitantes_sin_cupo"], reverse=True
-        )[:5]
+        region_data = next((r for r in regiones_info if r["region"] == region), None)
+        if not region_data:
+            region_data = {
+                "region": region,
+                "region_name": self._get_region_display(region),
+                "comunas": [],
+            }
+            regiones_info.append(region_data)
 
-        context["regiones_info"] = regiones_info
-        context["sin_cupo_mayores"] = sin_cupo_ordenados
-        return context
+        comuna_data = next(
+            (c for c in region_data["comunas"] if c["commune"] == comuna), None
+        )
+        if not comuna_data:
+            comuna_data = {
+                "commune": comuna,
+                "commune_id": comuna_id,
+                "tipos_proyecto": [],
+            }
+            region_data["comunas"].append(comuna_data)
+
+        comuna_data["tipos_proyecto"].append(
+            {
+                "tipo_proyecto": tipo,
+                "solicitantes_count": count,
+                "proyectos_info": proyectos_info,
+                "solicitantes_sin_cupo": solicitantes_sin_cupo,
+            }
+        )
+
+    def _top_comunas_por_region(self, regiones_info):
+        """Construye la lista de comunas por región para mostrar."""
+        top_cinco_por_region = {}
+
+        for region_data in regiones_info:
+            region = region_data["region"]
+            for comuna in region_data["comunas"]:
+                for tipo_proyecto in comuna["tipos_proyecto"]:
+                    solicitantes_sin_cupo = tipo_proyecto["solicitantes_sin_cupo"]
+                    if solicitantes_sin_cupo > 0:
+                        if region not in top_cinco_por_region:
+                            top_cinco_por_region[region] = []
+                        top_cinco_por_region[region].append(
+                            {
+                                "commune": comuna["commune"],
+                                "commune_id": comuna["commune_id"],
+                                "tipo_proyecto": tipo_proyecto["tipo_proyecto"],
+                                "solicitantes_sin_cupo": solicitantes_sin_cupo,
+                            }
+                        )
+
+        return top_cinco_por_region
+
+    def _obtener_comunas_por_region(self, regiones_info):
+        top_cinco_por_region = self._top_comunas_por_region(regiones_info)
+
+        for region, proyectos in top_cinco_por_region.items():
+            top_cinco_por_region[region] = sorted(
+                proyectos, key=lambda x: x["solicitantes_sin_cupo"], reverse=True
+            )[:5]
+
+        return [
+            {
+                "region_name": self._get_region_display(region),
+                "region_id": region,
+                "comunas": [
+                    {
+                        "commune": comuna["commune"],
+                        "commune_id": comuna["commune_id"],
+                        "proyectos": proyectos,
+                    }
+                    for comuna in proyectos
+                ],
+            }
+            for region, proyectos in top_cinco_por_region.items()
+        ]
+
+    @staticmethod
+    def _calcular_meses_desde_inicio(fecha_inicio):
+        """Calcula la cantidad de meses desde la fecha de inicio hasta la actualidad."""
+        delta = relativedelta(timezone.now().date(), fecha_inicio)
+        return (delta.years * 12) + delta.months
+
+    @staticmethod
+    def _get_region_display(region_code):
+        for code, name in Location.REGION_CHOICES:
+            if code == region_code:
+                return name
+        return "Región desconocida"
 
 
 class SolicitanteDeleteView(LoginRequiredMixin, PermitsPositionMixin, DeleteView):

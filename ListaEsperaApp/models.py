@@ -24,6 +24,7 @@ class NNAEntrante(models.Model):
         default=50,
         validators=[MinValueValidator(PRIORIDAD_MIN), MaxValueValidator(PRIORIDAD_MAX)],
     )
+    ranking = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = [
@@ -35,7 +36,18 @@ class NNAEntrante(models.Model):
         return f"NNA: {self.nna_FK.person_FK.name} | Prioridad: {self.priority}"
 
     def update_priority(self, new_priority, new_date_of_application):
-        # Guardamos el cambio en el historial, incluyendo la fecha de aplicación
+        # Verificamos si ya existe un cambio de prioridad con la misma fecha y misma prioridad
+        last_history = self.history.order_by("-changed_date").first()
+
+        # Si la prioridad y la fecha de cambio son las mismas que el último registro, no guardamos el historial
+        if (
+            last_history
+            and last_history.new_priority == new_priority
+            and last_history.changed_date == new_date_of_application
+        ):
+            return
+
+        # Si es un cambio diferente, guardamos el cambio en el historial
         PriorityHistory.objects.create(
             nna_entrante_FK=self,
             old_priority=self.priority,
@@ -44,10 +56,15 @@ class NNAEntrante(models.Model):
             changed_date=new_date_of_application,
             tipo_proyecto=self.tipo_proyecto,
         )
-        # Actualizamos la prioridad y la fecha
-        self.priority = new_priority
-        self.date_of_application = new_date_of_application
-        self.save()
+
+        if (
+            self.priority != new_priority
+            and self.date_of_application < new_date_of_application
+        ):
+            # Actualizamos la prioridad y la fecha de la solicitud
+            self.priority = new_priority
+            self.date_of_application = new_date_of_application
+            self.save()
 
 
 class PriorityHistory(models.Model):

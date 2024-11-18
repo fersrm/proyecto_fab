@@ -4,7 +4,7 @@ from ListaEsperaApp import views
 urlpatterns = [
     path("", views.ApplicantsFormView.as_view(), name="Applicants"),
     path(
-        "lista/<int:region_id>/",
+        "lista/<int:commune_id>/<str:proyecto>/",
         views.SolicitudesPorProyectoListView.as_view(),
         name="ApplicantsList",
     ),

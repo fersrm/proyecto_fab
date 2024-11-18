@@ -100,7 +100,13 @@ class ExcelAdapter(ExcelBaseAdapter):
         return False
 
     def get_date_project(self):
-        return parse_date(self.row["Fecha de inicio"])
+        fecha_inicio = parse_date(self.row["Fecha de inicio"])
+        fecha_egreso = self.get_discharge_date()
+
+        # Validar que ambas fechas sean válidas y comparar
+        if fecha_egreso and fecha_inicio and fecha_inicio < fecha_egreso:
+            return None
+        return fecha_inicio
 
     def get_ability_project(self):
         return int(self.row["Capacidad"])

@@ -132,7 +132,7 @@ class ActiveProjectListView(ListView):
     paginate_by = 7
 
     def get_queryset(self):
-        # desactivar_proyectos()
+        desactivar_proyectos()
         projects = Project.objects.filter(active=True)
         search_query = self.request.GET.get("search")
 
@@ -194,10 +194,10 @@ class ActiveProjectListView(ListView):
             # Agregar la información de meses restantes al proyecto
             project.remaining_months = remaining_project_months
 
-            # Obtener el número de solicitantes que coincidan con el tipo de proyecto y la región
+            # Obtener el número de solicitantes que coincidan con el tipo de proyecto y la comuna
             solicitantes_count = NNAEntrante.objects.filter(
                 tipo_proyecto=project.tipo_proyecto,
-                nna_FK__location_FK__region=project.location_FK.region,
+                nna_FK__location_FK__commune=project.location_FK.commune,
             ).count()
 
             project.solicitantes = solicitantes_count
@@ -509,7 +509,7 @@ class NotificationListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         search_query = self.request.GET.get("search")
-        # generar_alertas_nna_proyectos()
+        generar_alertas_nna_proyectos()
         notifications = Notification.objects.filter(is_active=True).order_by(
             "-alert_type"
         )
