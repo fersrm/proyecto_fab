@@ -25,12 +25,13 @@ class NNAEntrante(models.Model):
         validators=[MinValueValidator(PRIORIDAD_MIN), MaxValueValidator(PRIORIDAD_MAX)],
     )
     ranking = models.PositiveIntegerField(default=0)
+    is_processed_ranking = models.BooleanField(default=False)
 
     class Meta:
         ordering = [
             "priority",
             "date_of_application",
-        ]  # Ordena por prioridad primero, luego por fecha
+        ]
 
     def __str__(self):
         return f"NNA: {self.nna_FK.person_FK.name} | Prioridad: {self.priority}"
@@ -86,3 +87,15 @@ class PriorityHistory(models.Model):
 
     class Meta:
         ordering = ["-changed_date"]  # Ordenar por fecha de cambio, descendente
+
+
+class RankingHistory(models.Model):
+    nna_entrante = models.ForeignKey(
+        NNAEntrante, on_delete=models.CASCADE, related_name="ranking_history"
+    )
+    previous_ranking = models.PositiveIntegerField(null=True, blank=True)
+    new_ranking = models.PositiveIntegerField()
+    changed_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.nna_entrante} | Ranking: {self.previous_ranking} → {self.new_ranking} | Fecha: {self.changed_date}"

@@ -1,0 +1,54 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+
+{% block content_main %} 
+  <div class="flex flex-col gap-5 mb-8">
+    <h1 class="text-2xl font-medium text-gray-200 text-center">Historial de Ranking para {{ nna }}</h1>
+    <div class="flex flex-col justify-center sm:px-6 lg:px-8">
+      <div class="sm:mx-auto sm:w-full sm:max-w-[730px]">
+        <div class="bg-white shadow-lg rounded-lg p-6">
+          <h4 class="text-lg font-semibold text-gray-800 border-b pb-4 mb-6">
+            Cambios en el Ranking
+          </h4>
+          {% if history %}
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Fecha
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Ranking Anterior
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nuevo Ranking
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              {% for record in history %}
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ record.changed_date|date }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-500 font-semibold">
+                    {% if record.previous_ranking == 0 %}
+                        No tiene registro
+                    {% else %}
+                        {{ record.previous_ranking }}
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-green-500 font-semibold">{{ record.new_ranking }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="flex justify-center items-center h-24">
+            <strong class="text-gray-500 text-sm">No hay historial de cambios.</strong>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

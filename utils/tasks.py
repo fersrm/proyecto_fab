@@ -7,12 +7,13 @@ from ReportsApp.models import (
     EntryDetails,
     OnlyProjectExtension,
 )
-from ListaEsperaApp.models import NNAEntrante, PriorityHistory
+from ListaEsperaApp.models import NNAEntrante, PriorityHistory, RankingHistory
 from concurrent.futures import ThreadPoolExecutor
 from celery import shared_task
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from datetime import date
+from django.db import transaction
 
 
 def alertas_nna_proyecto(nna, project):
@@ -152,8 +153,18 @@ def actualizar_rankings_task():
 
         # Actualizar el ranking de cada solicitante
         for idx, solicitante in enumerate(solicitantes_grupo, start=1):
+            if solicitante.ranking != idx:
+                with transaction.atomic():
+                    RankingHistory.objects.create(
+                        nna_entrante=solicitante,
+                        previous_ranking=solicitante.ranking,
+                        new_ranking=idx,
+                        changed_date=timezone.now(),
+                    )
+            # Actualizar el ranking en el modelo principal
             solicitante.ranking = idx
-            solicitante.save(update_fields=["ranking"])
+            solicitante.is_processed_ranking = True
+            solicitante.save(update_fields=["ranking", "is_processed_ranking"])
 
     return "Rankings actualizados para todos los solicitantes por comuna y tipo de proyecto."
 

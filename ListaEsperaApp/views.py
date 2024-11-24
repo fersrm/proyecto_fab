@@ -233,7 +233,11 @@ class SolicitudesPorProyectoListView(ListView):
         # Filtrar los solicitantes en la región específica y ordenar por prioridad y fecha
         return (
             NNAEntrante.objects.select_related("nna_FK__person_FK")
-            .filter(nna_FK__location_FK=commune_id, tipo_proyecto=tipo_proyecto)
+            .filter(
+                nna_FK__location_FK=commune_id,
+                tipo_proyecto=tipo_proyecto,
+                is_processed_ranking=True,
+            )
             .order_by("-priority", "date_of_application")
         )
 
@@ -483,3 +487,17 @@ class SolicitanteDeleteView(LoginRequiredMixin, PermitsPositionMixin, DeleteView
         messages.success(self.request, "Solicitante eliminado correctamente")
         self.object.delete()
         return redirect(self.get_success_url())
+
+
+#######################################
+
+
+class RankingHistoryView(DetailView):
+    model = NNAEntrante
+    template_name = "pages/nna_entrantes/ranking_history.html"
+    context_object_name = "nna"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["history"] = self.object.ranking_history.order_by("-changed_date")
+        return context

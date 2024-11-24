@@ -23,4 +23,5 @@ urlpatterns = [
         views.SolicitanteDeleteView.as_view(),
         name="SolicitanteDelete",
     ),
+    path("ranking/<int:pk>/", views.RankingHistoryView.as_view(), name="Ranking"),
 ]
