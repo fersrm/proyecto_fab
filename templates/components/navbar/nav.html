@@ -36,62 +36,95 @@
             Lista PDF
           </a>
         </li>      
-        <li>
-          <a href="{% url "ProjectList" %}" class=" group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/proyectos/' %}text-white bg-gray-800 {% else %}   text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
-            <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-            </svg>
-            Lista Proyectos
-          </a>
-        </li>   
-        <li>
-          <a href="{% url "ReportList" %}" class=" group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/reporte/lista/' %}text-white bg-gray-800 {% else %}  text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
-            <svg  class="h-6 w-6 shrink-0" fill="currentColor" viewBox="0 0 576 512"  stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M512 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l448 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM208 256a64 64 0 1 0 0-128 64 64 0 1 0 0 128zm-32 32c-44.2 0-80 35.8-80 80c0 8.8 7.2 16 16 16l192 0c8.8 0 16-7.2 16-16c0-44.2-35.8-80-80-80l-64 0zM376 144c-13.3 0-24 10.7-24 24s10.7 24 24 24l80 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-80 0zm0 96c-13.3 0-24 10.7-24 24s10.7 24 24 24l80 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-80 0z"/>
-            </svg>
-            Lista Registro NNA
-          </a>
-        </li>
-        <li>
-          <a href="{% url "ReportDate" %}" class=" group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/reporte/tabla_fechas/' %}text-white bg-gray-800 {% else %} text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
-            <svg class="h-6 w-6 shrink-0"  fill="currentColor" viewBox="0 0 448 512" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40L64 64C28.7 64 0 92.7 0 128l0 16 0 48L0 448c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-256 0-48 0-16c0-35.3-28.7-64-64-64l-40 0 0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40L152 64l0-40zM48 192l80 0 0 56-80 0 0-56zm0 104l80 0 0 64-80 0 0-64zm128 0l96 0 0 64-96 0 0-64zm144 0l80 0 0 64-80 0 0-64zm80-48l-80 0 0-56 80 0 0 56zm0 160l0 40c0 8.8-7.2 16-16 16l-64 0 0-56 80 0zm-128 0l0 56-96 0 0-56 96 0zm-144 0l0 56-64 0c-8.8 0-16-7.2-16-16l0-40 80 0zM272 248l-96 0 0-56 96 0 0 56z"/>
-            </svg>
-            Lista Fechas 
-          </a>
-        </li>
-        <li>
-          <a href="{% url "ProjectExtensionList" %}" class=" group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/proyectos/extension/' %}text-white bg-gray-800 {% else %}  text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
-            <svg class="h-6 w-6 shrink-0" fill="currentColor" viewBox="0 0 576 512" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l448 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16L64 80zM0 96C0 60.7 28.7 32 64 32l448 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm96 64a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm104 0c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm-72-64a32 32 0 1 1 0-64 32 32 0 1 1 0 64zM96 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/>
-            </svg>
-            Extensión de Proyectos NNA
-          </a>
-        </li>
-        <li>
-          <a href="{% url "OnlyProjectExtensionList" %}" class=" group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/proyectos/extension_proyecto/' %}text-white bg-gray-800 {% else %}  text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
-            <svg class="h-6 w-6 shrink-0" fill="currentColor" viewBox="0 0 576 512" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l448 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16L64 80zM0 96C0 60.7 28.7 32 64 32l448 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm96 64a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm104 0c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm-72-64a32 32 0 1 1 0-64 32 32 0 1 1 0 64zM96 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/>
-            </svg>
-            Extensión de Proyectos
-          </a>
-        </li>
-        <li>
-          <a href="{% url "ActiveProjectList" %}" class=" group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/proyectos/cupos_proyecto/' %}text-white bg-gray-800 {% else %}  text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
-            <svg class="h-6 w-6 shrink-0" fill="currentColor" viewBox="0 0 576 512" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l448 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16L64 80zM0 96C0 60.7 28.7 32 64 32l448 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm96 64a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm104 0c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm-72-64a32 32 0 1 1 0-64 32 32 0 1 1 0 64zM96 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/>
-            </svg>
-            Cupos en Proyectos
-          </a>
-        </li>
-        <li>
-          <a href="{% url "ApplicantsRegionList" %}" class=" group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/solicitantes/lista_region/' %}text-white bg-gray-800 {% else %}  text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
-            <svg class="h-6 w-6 shrink-0" fill="currentColor" viewBox="0 0 576 512" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l448 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16L64 80zM0 96C0 60.7 28.7 32 64 32l448 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm96 64a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm104 0c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm-72-64a32 32 0 1 1 0-64 32 32 0 1 1 0 64zM96 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/>
-            </svg>
-            Solicitantes Proyectos
-          </a>
-        </li>
+
+        <div class="space-y-2" x-data="{ openMenu: null }">
+          <!-- Proyectos -->
+          <div>
+            <button 
+              @click="openMenu === 'projects' ? openMenu = null : openMenu = 'projects'" 
+              :class="openMenu === 'projects' ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-gray-400 hover:text-white'"
+              class="w-full flex justify-between items-center py-2 rounded-md transition">
+              <div class="flex gap-x-3 font-semibold leading-6 text-sm">
+                <svg class="h-6 w-6 shrink-0" fill="currentColor" stroke-width="1.5" stroke="currentColor" aria-hidden="true"  viewBox="0 0 384 512">
+                  <path d="M64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l80 0 0-64c0-26.5 21.5-48 48-48s48 21.5 48 48l0 64 80 0c8.8 0 16-7.2 16-16l0-384c0-8.8-7.2-16-16-16L64 48zM0 64C0 28.7 28.7 0 64 0L320 0c35.3 0 64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm88 40c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16l0 48c0 8.8-7.2 16-16 16l-48 0c-8.8 0-16-7.2-16-16l0-48zM232 88l48 0c8.8 0 16 7.2 16 16l0 48c0 8.8-7.2 16-16 16l-48 0c-8.8 0-16-7.2-16-16l0-48c0-8.8 7.2-16 16-16zM88 232c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16l0 48c0 8.8-7.2 16-16 16l-48 0c-8.8 0-16-7.2-16-16l0-48zm144-16l48 0c8.8 0 16 7.2 16 16l0 48c0 8.8-7.2 16-16 16l-48 0c-8.8 0-16-7.2-16-16l0-48c0-8.8 7.2-16 16-16z"/>
+                </svg>
+                Proyectos
+              </div>
+              <svg x-show="openMenu === 'projects'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <svg x-show="openMenu !== 'projects'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <ul 
+              x-show="openMenu === 'projects'" 
+              x-transition:enter="transition ease-out duration-300" 
+              x-transition:enter-start="opacity-0 transform scale-y-75" 
+              x-transition:enter-end="opacity-100 transform scale-y-100" 
+              x-transition:leave="transition ease-in duration-200" 
+              x-transition:leave-start="opacity-100 transform scale-y-100" 
+              x-transition:leave-end="opacity-0 transform scale-y-75" 
+              class="mt-2 space-y-1 pl-4 border-l border-gray-700 origin-top">
+              <li>
+                <a href="{% url 'ProjectList' %}" class="block {% if request.path == '/proyectos/' %}text-white{% else %} text-gray-400 hover:text-white{% endif %}">Lista Proyectos</a>
+              </li>
+              <li>
+                <a href="{% url 'OnlyProjectExtensionList' %}" class="block {% if request.path == '/proyectos/extension_proyecto/' %}text-white{% else %} text-gray-400 hover:text-white{% endif %}">Extensión de Proyectos</a>
+              </li>
+              <li>
+                <a href="{% url 'ActiveProjectList' %}" class="block {% if request.path == '/proyectos/cupos_proyecto/' %}text-white{% else %} text-gray-400 hover:text-white{% endif %}">Cupos en Proyectos</a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- NNA -->
+          <div>
+            <button 
+              @click="openMenu === 'nna' ? openMenu = null : openMenu = 'nna'" 
+              :class="openMenu === 'nna' ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-gray-400 hover:text-white'" 
+              class="w-full flex justify-between items-center py-2 rounded-md transition">
+              <div class="flex gap-x-3 font-semibold leading-6 text-sm">
+                <svg class="h-6 w-6 shrink-0" fill="currentColor" stroke-width="1.5" stroke="currentColor" aria-hidden="true"  viewBox="0 0 640 512">
+                  <path d="M160 0a64 64 0 1 1 0 128A64 64 0 1 1 160 0zM88 480l0-80-17.8 0c-10.9 0-18.6-10.7-15.2-21.1l31.1-93.4L57.5 323.3c-10.7 14.1-30.8 16.8-44.8 6.2s-16.8-30.7-6.2-44.8L65.4 207c22.4-29.6 57.5-47 94.6-47s72.2 17.4 94.6 47l58.9 77.7c10.7 14.1 7.9 34.2-6.2 44.8s-34.2 7.9-44.8-6.2l-28.6-37.8L265 378.9c3.5 10.4-4.3 21.1-15.2 21.1L232 400l0 80c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-80-16 0 0 80c0 17.7-14.3 32-32 32s-32-14.3-32-32zM480 0a64 64 0 1 1 0 128A64 64 0 1 1 480 0zm-8 384l0 96c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-179.5L395.1 321c-9.4 15-29.2 19.4-44.1 10s-19.4-29.2-10-44.1l51.7-82.1c17.6-27.9 48.3-44.9 81.2-44.9l12.3 0c33 0 63.7 16.9 81.2 44.9L619.1 287c9.4 15 4.9 34.7-10 44.1s-34.7 4.9-44.1-10L552 300.5 552 480c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-96-16 0z"/>
+                </svg>
+                NNA
+              </div>
+              <svg x-show="openMenu === 'nna'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <svg x-show="openMenu !== 'nna'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <ul 
+              x-show="openMenu === 'nna'" 
+              x-transition:enter="transition ease-out duration-300" 
+              x-transition:enter-start="opacity-0 transform scale-y-75" 
+              x-transition:enter-end="opacity-100 transform scale-y-100" 
+              x-transition:leave="transition ease-in duration-200" 
+              x-transition:leave-start="opacity-100 transform scale-y-100" 
+              x-transition:leave-end="opacity-0 transform scale-y-75" 
+              class="mt-2 space-y-1 pl-4 border-l border-gray-700 origin-top">
+              <li>
+                <a href="{% url 'ReportList' %}" class="block {% if request.path == '/reporte/lista/' %}text-white{% else %} text-gray-400 hover:text-white{% endif %}">
+                  Lista Registro NNA
+                </a>
+              </li>
+              <li>
+                <a href="{% url "Charts" %}"  class="block {% if request.path == '/reporte/graficos/' %}text-white{% else %} text-gray-400 hover:text-white{% endif %}">Gráficos</a>
+              </li>
+              <li>
+                <a href="{% url 'ReportDate' %}" class="block {% if request.path ==  '/reporte/tabla_fechas/' %}text-white{% else %} text-gray-400 hover:text-white{% endif %}">Lista Fechas</a>
+              </li>
+              <li>
+                <a href="{% url 'ProjectExtensionList' %}" class="block {% if request.path == '/proyectos/extension/' %}text-white{% else %} text-gray-400 hover:text-white{% endif %}">Extensión de NNA</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
         <li>
           <a href="{% url "NotificationList" %}" class=" group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/proyectos/extension/notificaciones/' %}text-white bg-gray-800 {% else %}  text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
             <svg class="h-6 w-6 shrink-0" fill="currentColor" viewBox="0 0 448 512" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -101,11 +134,11 @@
           </a>
         </li>
         <li>
-          <a href="{% url "Charts" %}" class=" group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/reporte/graficos/' %}text-white bg-gray-800 {% else %} text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
-            <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">  
-              <path stroke="none" d="M0 0h24v24H0z"/>  <rect x="3" y="12" width="6" height="8" rx="1" />  <rect x="9" y="8" width="6" height="12" rx="1" />  <rect x="15" y="4" width="6" height="16" rx="1" />  <line x1="4" y1="20" x2="18" y2="20" />
+          <a href="{% url "ApplicantsRegionList" %}" class=" group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold {% if request.path == '/solicitantes/lista_region/' %}text-white bg-gray-800 {% else %}  text-gray-400 hover:text-white hover:bg-gray-800 {% endif %}">
+            <svg class="h-6 w-6 shrink-0" fill="currentColor" viewBox="0 0 576 512" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l448 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16L64 80zM0 96C0 60.7 28.7 32 64 32l448 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm96 64a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm104 0c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l224 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-224 0c-13.3 0-24-10.7-24-24zm-72-64a32 32 0 1 1 0-64 32 32 0 1 1 0 64zM96 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/>
             </svg>
-            Gráficos
+            Solicitantes Proyectos
           </a>
         </li>
       </ul>
@@ -139,7 +172,7 @@
           <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />  
           <path d="M7 12h14l-3 -3m0 6l3 -3" />
         </svg>
-        Cerrar Seccion
+        Cerrar Sesión
       </a>
     </li>
   </ul>

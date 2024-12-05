@@ -72,14 +72,6 @@ class ProjectCreateView(LoginRequiredMixin, PermitsPositionMixin, CreateView):
         messages.success(self.request, "Proyecto agregado correctamente")
         return super().form_valid(form)
 
-    def form_invalid(self, form):
-        messages.error(self.request, "Error en el formulario")
-        for field, errors in form.errors.items():
-            for error in errors:
-                print(field, error)
-                messages.error(self.request, f"{error}")
-        return redirect("ProjectCreate")
-
     def get_success_url(self):
         return reverse_lazy("ProjectList")
 
@@ -93,14 +85,6 @@ class ProjectUpdateView(LoginRequiredMixin, PermitsPositionMixin, UpdateView):
         form.save()
         messages.success(self.request, "Proyecto editado correctamente")
         return super().form_valid(form)
-
-    def form_invalid(self, form):
-        messages.error(self.request, "Error en el formulario")
-        for field, errors in form.errors.items():
-            for error in errors:
-                print(field, error)
-                messages.error(self.request, f"{error}")
-        return redirect("ProjectEdit")
 
     def get_success_url(self):
         return reverse_lazy("ProjectList")
@@ -125,7 +109,7 @@ from utils.tasks import desactivar_proyectos
 from ListaEsperaApp.models import NNAEntrante
 
 
-class ActiveProjectListView(ListView):
+class ActiveProjectListView(LoginRequiredMixin, ListView):
     model = Project
     template_name = "pages/proyectos/cupos_project_list.html"
     context_object_name = "projects"
@@ -474,13 +458,21 @@ class ProjectExtensionDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+class ExtensionNNADetailView(LoginRequiredMixin, PermitsPositionMixin, DetailView):
+    model = ProjectExtension
+    template_name = "pages/extension/nna_extension_details.html"
+    context_object_name = "nna_extension"
+
+
 class ProjectExtensionUpdateView(LoginRequiredMixin, PermitsPositionMixin, UpdateView):
     model = ProjectExtension
     form_class = ProjectExtensionUpdateForm
     template_name = "pages/extension/editar_proyecto_extension.html"
 
     def form_valid(self, form):
-        form.save()
+        project_extension = form.save(commit=False)
+        project_extension.approved_user_FK = self.request.user
+        project_extension.save()
         messages.success(self.request, "Aprobado correctamente")
         return super().form_valid(form)
 
@@ -490,7 +482,7 @@ class ProjectExtensionUpdateView(LoginRequiredMixin, PermitsPositionMixin, Updat
             for error in errors:
                 print(field, error)
                 messages.error(self.request, f"{error}")
-        return redirect("ProjectExtensionEdit")
+        return redirect("ProjectExtensionList")
 
     def get_success_url(self):
         return reverse_lazy("ProjectExtensionList")
@@ -673,6 +665,12 @@ class OnlyProjectExtensionDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+class ExtensionProjectDetailView(LoginRequiredMixin, PermitsPositionMixin, DetailView):
+    model = OnlyProjectExtension
+    template_name = "pages/proyectos/extension/project_extension_details.html"
+    context_object_name = "project_extension"
+
+
 class OnlyProjectExtensionUpdateView(
     LoginRequiredMixin, PermitsPositionMixin, UpdateView
 ):
@@ -681,17 +679,11 @@ class OnlyProjectExtensionUpdateView(
     template_name = "pages/proyectos/extension/editar_proyecto_extension.html"
 
     def form_valid(self, form):
-        form.save()
+        project_extension = form.save(commit=False)
+        project_extension.approved_user_FK = self.request.user
+        project_extension.save()
         messages.success(self.request, "La extensión se aprobó correctamente.")
         return super().form_valid(form)
-
-    def form_invalid(self, form):
-        messages.error(self.request, "Error en el formulario")
-        for field, errors in form.errors.items():
-            for error in errors:
-                print(field, error)
-                messages.error(self.request, f"{error}")
-        return redirect("OnlyProjectExtensionEdit")
 
     def get_success_url(self):
         return reverse_lazy("OnlyProjectExtensionList")

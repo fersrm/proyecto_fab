@@ -10,13 +10,13 @@ class ExcelBaseAdapter:
     # Métodos comunes a todos los adaptadores
 
     def get_rut(self):
-        return str(self.row["rut"]).strip().upper()
+        return str(self.row["RUT"]).strip().upper()
 
     def get_sex(self):
         return True if str(self.row["sexo"]).strip().lower() == "m" else False
 
     def get_birthdate(self):
-        return parse_date(self.row["fechanacimiento"])
+        return parse_date(self.row["fecha_nacimiento"])
 
     def get_name(self):
         return str(self.row["nombres"]).strip().capitalize()
@@ -43,7 +43,7 @@ class ExcelBaseAdapter:
         return f"{self.get_region()}-{self.get_commune()}"
 
     def get_solicitor_name(self):
-        return str(self.row["SolicitanteIngreso"]).strip().upper()
+        return str(self.row["Solicitante_Ingreso"]).strip().upper()
 
     def get_legal_quality_name(self):
         return str(self.row["CalidadJuridica"]).strip().upper()
@@ -104,9 +104,9 @@ class ExcelAdapter(ExcelBaseAdapter):
         fecha_egreso = self.get_discharge_date()
 
         # Validar que ambas fechas sean válidas y comparar
-        if fecha_egreso and fecha_inicio and fecha_inicio < fecha_egreso:
-            return None
-        return fecha_inicio
+        if fecha_egreso and fecha_inicio and fecha_inicio <= fecha_egreso:
+            return fecha_inicio
+        return None
 
     def get_ability_project(self):
         return int(self.row["Capacidad"])

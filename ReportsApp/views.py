@@ -113,6 +113,7 @@ class ReportNnaFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
             self.create_or_update_entry(adapter, nna, project)
         except Exception as e:
             cod_nna = adapter.get_cod_nna()
+            print(e)
             if "valor nulo en la columna" in str(e):
                 error_message = (
                     f"Error en la fila {index + 2}: El código NNA {cod_nna} no se pudo procesar porque falta un dato requerido en la columna. "

@@ -18,6 +18,11 @@ urlpatterns = [
         name="ProjectExtensionDetail",
     ),
     path(
+        "extension/motivo_NNA/<int:pk>/",
+        views.ExtensionNNADetailView.as_view(),
+        name="ExtensionNNAMotivo",
+    ),
+    path(
         "nna/<int:nna_pk>/project/<int:project_pk>/extension/agregar/",
         views.ProjectExtensionCreateView.as_view(),
         name="ProjectExtensionCreate",
@@ -43,6 +48,11 @@ urlpatterns = [
         "extension_proyecto/detalle/<int:pk>/",
         views.OnlyProjectExtensionDetailView.as_view(),
         name="OnlyProjectExtensionDetail",
+    ),
+    path(
+        "extension/motivo_proyectos/<int:pk>/",
+        views.ExtensionProjectDetailView.as_view(),
+        name="ExtensionProjectMotivo",
     ),
     path(
         "project/<int:project_pk>/extension_proyecto/agregar/",

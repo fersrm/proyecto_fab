@@ -21,18 +21,10 @@ class ReportForm(forms.Form):
 
 
 class NnaEditForm(forms.ModelForm):
-    ATTENTION_CHOICES = [
-        (True, "Residencial"),
-        (False, "Ambulatoria"),
-    ]
-
-    type_of_attention = forms.ChoiceField(
-        choices=ATTENTION_CHOICES, widget=forms.RadioSelect, label="Tipo de Atención"
-    )
 
     class Meta:
         model = NNA
-        fields = ["type_of_attention", "location_FK"]
+        fields = ["location_FK"]
         labels = {"location_FK": "Ubicación"}
 
 

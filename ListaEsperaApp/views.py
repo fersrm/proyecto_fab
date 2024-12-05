@@ -1,4 +1,4 @@
-from django.views.generic import ListView, DetailView, FormView, DeleteView
+from django.views.generic import ListView, DetailView, FormView, DeleteView, CreateView
 from .models import NNAEntrante, PriorityHistory
 from ReportsApp.models import (
     Person,
@@ -9,9 +9,10 @@ from ReportsApp.models import (
     Legal,
     NNA,
     Project,
+    EntryDetails,
 )
-from django.shortcuts import redirect
-from .forms import ReportForm
+from django.shortcuts import redirect, get_object_or_404
+from .forms import ReportForm, EntryDetailsForm
 from django.contrib import messages
 from django.urls import reverse_lazy
 import pandas as pd
@@ -23,6 +24,7 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.core.paginator import Paginator
 
+
 # Premiosos
 from django.contrib.auth.mixins import LoginRequiredMixin
 from core.mixins import PermitsPositionMixin
@@ -30,7 +32,7 @@ from core.mixins import PermitsPositionMixin
 # Create your views here.
 
 
-class ApplicantsFormView(FormView):
+class ApplicantsFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
     model = NNA
     form_class = ReportForm
     template_name = "pages/nna_entrantes/carga_excel.html"
@@ -218,7 +220,7 @@ class ApplicantsFormView(FormView):
 from utils.tasks import actualizar_rankings_task, reorganizar_historial_prioridades_task
 
 
-class SolicitudesPorProyectoListView(ListView):
+class SolicitudesPorProyectoListView(LoginRequiredMixin, ListView):
     model = NNAEntrante
     template_name = "pages/nna_entrantes/solicitudes.html"
     context_object_name = "solicitantes"
@@ -237,6 +239,7 @@ class SolicitudesPorProyectoListView(ListView):
                 nna_FK__location_FK=commune_id,
                 tipo_proyecto=tipo_proyecto,
                 is_processed_ranking=True,
+                nna_FK__not_in_project=True,
             )
             .order_by("-priority", "date_of_application")
         )
@@ -249,7 +252,7 @@ class SolicitudesPorProyectoListView(ListView):
         return context
 
 
-class HistorialSolicitanteDetailView(DetailView):
+class HistorialSolicitanteDetailView(LoginRequiredMixin, DetailView):
     model = NNAEntrante
     template_name = "pages/nna_entrantes/historial_solicitante.html"
     context_object_name = "solicitante"
@@ -286,7 +289,7 @@ class HistorialSolicitanteDetailView(DetailView):
         return context
 
 
-class SolicitantesPorRegionView(ListView):
+class SolicitantesPorRegionView(LoginRequiredMixin, ListView):
     model = Location
     template_name = "pages/nna_entrantes/solicitantes_por_comuna.html"
 
@@ -304,7 +307,8 @@ class SolicitantesPorRegionView(ListView):
     def _obtener_regiones_info(self):
         """Construye la estructura principal de regiones_info."""
         solicitantes_por_region_comuna_y_tipo = (
-            NNAEntrante.objects.values(
+            NNAEntrante.objects.filter(nna_FK__not_in_project=True)
+            .values(
                 "nna_FK__location_FK__region",
                 "nna_FK__location_FK__commune",
                 "nna_FK__location_FK__id",
@@ -489,10 +493,53 @@ class SolicitanteDeleteView(LoginRequiredMixin, PermitsPositionMixin, DeleteView
         return redirect(self.get_success_url())
 
 
+class AssociateNNAProjectView(LoginRequiredMixin, PermitsPositionMixin, CreateView):
+    model = EntryDetails
+    form_class = EntryDetailsForm
+    template_name = "pages/nna_entrantes/associate_nna_project.html"
+    success_url = reverse_lazy("ApplicantsRegionList")
+
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+
+        # Obtener el NNA
+        nna_id = self.kwargs.get("nna_id")
+        nna = get_object_or_404(NNA, id=nna_id)
+
+        # Filtrar los proyectos por la misma región que el NNA
+        if nna.location_FK:
+            form.fields["project_FK"].queryset = Project.objects.filter(
+                location_FK=nna.location_FK
+            )
+        else:
+            form.fields["project_FK"].queryset = Project.objects.none()
+
+        return form
+
+    def form_valid(self, form):
+        # Asociar el NNA al formulario
+        nna_id = self.kwargs.get("nna_id")
+        nna = get_object_or_404(NNA, id=nna_id)
+        form.instance.nna_FK = nna
+
+        # Calcular date_of_exit
+        date_of_entry = form.cleaned_data["date_of_entry"]
+        duration_in_months = int(form.cleaned_data["duration_in_months"])
+        form.instance.date_of_exit = date_of_entry + relativedelta(
+            months=duration_in_months
+        )
+
+        # Actualizar el campo not_in_project
+        nna.not_in_project = False
+        nna.save()
+
+        return super().form_valid(form)
+
+
 #######################################
 
 
-class RankingHistoryView(DetailView):
+class RankingHistoryView(LoginRequiredMixin, DetailView):
     model = NNAEntrante
     template_name = "pages/nna_entrantes/ranking_history.html"
     context_object_name = "nna"

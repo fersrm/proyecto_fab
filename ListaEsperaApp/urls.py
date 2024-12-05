@@ -24,4 +24,9 @@ urlpatterns = [
         name="SolicitanteDelete",
     ),
     path("ranking/<int:pk>/", views.RankingHistoryView.as_view(), name="Ranking"),
+    path(
+        "associate-nna/<int:nna_id>/",
+        views.AssociateNNAProjectView.as_view(),
+        name="associate_nna",
+    ),
 ]

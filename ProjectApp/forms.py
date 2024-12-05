@@ -26,10 +26,22 @@ class ProjectBaseForm(forms.ModelForm):
             "project_name": "Nombre de Proyecto",
             "type_of_attention": "Tipo de Atención",
             "ability": "Capacidad",
-            "duration": "Duración",
+            "duration": "Duración (En meses)",
             "institution_FK": "Institución",
             "location_FK": "Comuna",
         }
+
+    def clean_duration(self):
+        duration = self.cleaned_data.get("duration")
+        if duration <= 0:
+            raise forms.ValidationError("La duración debe ser mayor a 0.")
+        return duration
+
+    def clean_ability(self):
+        ability = self.cleaned_data.get("ability")
+        if ability <= 0:
+            raise forms.ValidationError("La cantidad de cupos debe ser mayor a 0.")
+        return ability
 
 
 class ProjectCreateForm(ProjectBaseForm):
@@ -38,7 +50,14 @@ class ProjectCreateForm(ProjectBaseForm):
     )
 
     class Meta(ProjectBaseForm.Meta):
-        fields = ["code"] + ProjectBaseForm.Meta.fields + ["date_project"]
+        fields = (
+            [
+                "code",
+                "tipo_proyecto",
+            ]
+            + ProjectBaseForm.Meta.fields
+            + ["date_project"]
+        )
         labels = {
             **ProjectBaseForm.Meta.labels,
             "code": "Código",
@@ -106,6 +125,12 @@ class OnlyProjectExtensionCreateForm(forms.ModelForm):
             "extension": "Extensión en Meses",
             "reason": "Motivo",
         }
+
+    def clean_extension(self):
+        extension = self.cleaned_data.get("extension")
+        if extension <= 0:
+            raise forms.ValidationError("La extensión debe ser mayor a 0.")
+        return extension
 
 
 class OnlyProjectExtensionUpdateForm(forms.ModelForm):

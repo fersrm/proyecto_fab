@@ -26,7 +26,6 @@ class Person(models.Model):
         return f"{self.name} {self.last_name_paternal} {self.last_name_maternal}"
 
 
-# unique=True a comuna ahora no se puede por la forma del Excel
 class Location(models.Model):
     REGION_CHOICES = [
         (15, "Región de Arica y Parinacota"),
@@ -110,8 +109,9 @@ class NNA(models.Model):
 # Después quitar default datetime.now
 class Project(models.Model):
     TIPOS_PROYECTOS = [
-        ("ABUSO", "Abuso"),
-        ("RIESGO VITAL", "Riesgo vital"),
+        ("AFT", "AFT"),
+        ("PRM", "PRM"),
+        ("PIE", "PIE"),
     ]
     code = models.IntegerField(unique=True)
     project_name = models.CharField(max_length=100)
@@ -120,7 +120,7 @@ class Project(models.Model):
     ability = models.IntegerField(default=30)
     duration = models.IntegerField(default=12)
     tipo_proyecto = models.CharField(
-        max_length=20, choices=TIPOS_PROYECTOS, default="ABUSO"
+        max_length=20, choices=TIPOS_PROYECTOS, default="PIE"
     )
     active = models.BooleanField(default=False)
     institution_FK = models.ForeignKey(
@@ -153,7 +153,18 @@ class ProjectExtension(models.Model):
     reason = models.TextField(max_length=1000)
     nna_FK = models.ForeignKey(NNA, on_delete=models.CASCADE)
     project_FK = models.ForeignKey(Project, on_delete=models.CASCADE)
-    user_FK = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    approved_user_FK = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="project_approved_user_extensions",
+    )
+    user_FK = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="project_user_extensions",
+    )
 
     def __str__(self):
         return str(self.nna_FK.cod_nna)
@@ -184,7 +195,19 @@ class OnlyProjectExtension(models.Model):
     date = models.DateField(auto_now_add=True)
     reason = models.TextField(max_length=1000)
     project_FK = models.ForeignKey(Project, on_delete=models.CASCADE)
-    user_FK = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user_FK = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="only_project_user_extensions",
+    )
+    approved_user_FK = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="only_project_approved_user_extensions",
+    )
 
     def __str__(self):
         return str(self.project_FK.code)

@@ -1,0 +1,31 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load tailwind_filters %}
+  
+{% block head_title %}
+  Asociar proyecto
+{% endblock head_title %}
+
+{% block content_main %}
+
+  <div class="flex min-h-full flex-col justify-center sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-[680px]">
+      <div class="bg-white px-6 py-10 shadow rounded-lg sm:px-12">
+        <h2 class="text-2xl font-medium text-gray-800 text-center">Asociar NNA a proyecto</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-4">
+            {{ form.project_FK|as_crispy_field }}
+          </div>
+          <div class="mb-4">
+            {{ form.date_of_entry|as_crispy_field }}
+          </div>
+          <div class="mb-4">
+            {{ form.duration_in_months|as_crispy_field }}
+          </div>
+          {% include "components/btn/button.html" with button_text="Guardar" %}
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

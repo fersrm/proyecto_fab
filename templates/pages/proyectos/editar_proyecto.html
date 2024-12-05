@@ -16,5 +16,7 @@
 
   {% url 'ProjectList' as project_list_url %}
   {% include "components/btn/ancor_cancelar.html" with ancor_link=project_list_url ancor_text="Cancelar" %}
+  
+  {% include 'components/mensajes.html' %}
 
 {% endblock content_pages %}
