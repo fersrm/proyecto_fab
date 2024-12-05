@@ -105,7 +105,7 @@ class ProjectDeleteView(LoginRequiredMixin, PermitsPositionMixin, DeleteView):
 ###############################
 #####      CUPOS     ##########
 ###############################
-from utils.tasks import desactivar_proyectos
+#from utils.tasks import desactivar_proyectos
 from ListaEsperaApp.models import NNAEntrante
 
 
@@ -491,7 +491,7 @@ class ProjectExtensionUpdateView(LoginRequiredMixin, PermitsPositionMixin, Updat
 ###############################
 ##### Notificaciones ##########
 ###############################
-from utils.tasks import generar_alertas_nna_proyectos
+#from utils.tasks import generar_alertas_nna_proyectos
 
 
 class NotificationListView(LoginRequiredMixin, ListView):

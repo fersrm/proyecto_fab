@@ -217,7 +217,7 @@ class ApplicantsFormView(LoginRequiredMixin, PermitsPositionMixin, FormView):
 
 
 ###################################
-from utils.tasks import actualizar_rankings_task, reorganizar_historial_prioridades_task
+#from utils.tasks import actualizar_rankings_task, reorganizar_historial_prioridades_task
 
 
 class SolicitudesPorProyectoListView(LoginRequiredMixin, ListView):
