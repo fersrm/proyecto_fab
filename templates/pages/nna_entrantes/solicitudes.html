@@ -1,0 +1,99 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+
+{% block content_main %}  
+
+  {% if object_list %}
+
+    <div class="overflow-x-auto min-h-96"> 
+      <table aria-labelledby="tablaReporteExcel" aria-describedby="tablaReporteExcel" class="w-full whitespace-nowrap text-left">
+        <colgroup>
+          <col class="w-full sm:w-4/12">
+          <col class="lg:w-4/12">
+          <col class="lg:w-2/12">
+          <col class="lg:w-1/12">
+          <col class="lg:w-1/12">
+        </colgroup>
+        <thead class="border-b border-white/10 text-sm leading-6 text-white">
+          <tr>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Posición</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Código NNA</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Nombre Completo</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">RUT</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Tipo de Ingreso</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Prioridad</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Comuna</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Fecha de Solicitud</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          {% for solicitante in solicitantes %}
+          <tr>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ solicitante.ranking }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ solicitante.nna_FK.cod_nna }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ solicitante.nna_FK.person_FK.name }} {{ solicitante.nna_FK.person_FK.last_name_paternal }} {{ solicitante.nna_FK.person_FK.last_name_maternal }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ solicitante.nna_FK.person_FK.rut }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ solicitante.tipo_proyecto }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ solicitante.priority }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ solicitante.nna_FK.location_FK.commune }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ solicitante.date_of_application }}
+            </td>
+            <td class="py-1 pl-0  text-sm leading-6  md:table-cell">
+              <div class="flex gap-2">
+                <a href="{% url 'Ranking' solicitante.id %}" class="flex w-12 justify-center rounded-md bg-orange-300 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400">
+                  {% include "components/svg/svg_lista.html" %}
+                </a>
+                <a href="{% url 'ApplicantsDetail' solicitante.nna_FK.id %}" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
+                  {% include "components/svg/svg_user_list.html" %}
+                </a>
+                {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
+                <a href="{% url 'associate_nna' solicitante.nna_FK.id  %}" class="flex items-center w-12 justify-center rounded-md bg-emerald-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+                  {% include "components/svg/svg_editar.html" %}
+                </a>
+                <a href="{% url 'SolicitanteDelete' solicitante.nna_FK.id %}" onclick="return confirm('¿Estás seguro de que deseas borrar NNA {{ solicitante.nna_FK.cod_nna }} ?');" class="flex items-center w-12 justify-center rounded-md bg-red-500 px-3 py-[10px]text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ">
+                  {% include "components/svg/svg_eliminar.html" %}
+                </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+    
+  {% else %}
+
+    <strong>NO HAY REGISTROS</strong>
+
+  {% endif %} 
+
+  {% include 'components/paginador.html' %}
+
+  {% include 'components/mensajes.html' %} 
+
+  {% include "pages/reportes_nna/components/mensajes_excel.html" %}
+
+{% endblock content_main %}
+
+{% block javascript %}
+  <script defer src="{% static 'js/carga_documento.js' %}"></script>
+  <script defer src="{% static "js/show_form.js" %}"></script>
+{% endblock javascript %}

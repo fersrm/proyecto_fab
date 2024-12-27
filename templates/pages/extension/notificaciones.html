@@ -1,0 +1,75 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+
+{% block content_main %}  
+
+  {% if object_list %}
+
+    <div class="overflow-x-auto min-h-96"> 
+      <table aria-labelledby="tablaReporteExcel" aria-describedby="tablaReporteExcel" class="w-full whitespace-nowrap text-left">
+        <colgroup>
+          <col class="w-full sm:w-4/12">
+          <col class="lg:w-4/12">
+          <col class="lg:w-2/12">
+          <col class="lg:w-1/12">
+          <col class="lg:w-1/12">
+        </colgroup>
+        <thead class="border-b border-white/10 text-sm leading-6 text-white">
+          <tr>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Código NNA</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Nombre</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Rut</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Proyecto Nombre</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Duracción</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Alerta</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+
+        {% for item in object_list %}
+  
+          <tr>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.nna_FK.cod_nna }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.nna_FK.person_FK.name }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.nna_FK.person_FK.rut }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.project_FK.project_name }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.total_duration }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {% if item.alert_type == "ROJA" %}
+                <svg viewBox="0 0 512 512" fill="#ff826c">
+                  <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24l0 112c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-112c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/>
+                </svg>
+              {% else %}
+                <svg viewBox="0 0 512 512" fill="#ffe48c">
+                  <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24l0 112c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-112c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/>
+                </svg>
+              {% endif %}
+            </td>
+          </tr>
+
+        {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+    
+  {% else %}
+    <strong>NO HAY REGISTROS</strong>
+  {% endif %} 
+
+  {% include 'components/paginador.html' %}
+  {% include 'components/mensajes.html' %} 
+
+{% endblock content_main %}
+
+

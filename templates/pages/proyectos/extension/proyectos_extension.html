@@ -1,0 +1,79 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}
+
+{% block content_main %}
+
+  {% if object_list %}
+
+    <div class="overflow-x-auto min-h-96"> 
+      <table aria-labelledby="tablaReporteExcel" aria-describedby="tablaReporteExcel" class="w-full whitespace-nowrap text-left">
+        <colgroup>
+          <col class="w-full sm:w-4/12">
+          <col class="lg:w-4/12">
+          <col class="lg:w-2/12">
+          <col class="lg:w-1/12">
+          <col class="lg:w-1/12">
+        </colgroup>
+        <thead class="border-b border-white/10 text-sm leading-6 text-white">
+          <tr>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Código</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Nombre Proyecto</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Extendido</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Tipo de atencion</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Duracion Base</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Tiempo Total</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+
+        {% for item in object_list %}
+  
+          <tr>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.code }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.project_name }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ item.veces_extension }} Veces
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {% if item.type_of_attention %}
+                Recidencial
+              {% else %}
+                Ambulatoria
+              {% endif %}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ item.base_duration }} meses
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ item.total_duration }} meses
+            </td>
+            <td>
+              <a href="{% url 'OnlyProjectExtensionDetail' item.id %}" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
+                {% include "components/svg/svg_extender.html" %}
+              </a>
+            </td>
+          </tr>
+
+        {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+    
+  {% else %}
+    <strong>NO HAY REGISTROS</strong>
+  {% endif %} 
+
+  {% include 'components/paginador.html' %}
+  {% include 'components/mensajes.html' %}
+
+{% endblock content_main %}
+
+{% block javascript %}
+  <script defer src="{% static "js/show_form.js" %}"></script>
+{% endblock javascript %}

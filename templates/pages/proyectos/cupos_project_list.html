@@ -1,0 +1,100 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+
+{% block content_main %}  
+
+  {% if projects %}
+
+    <div class="overflow-x-auto min-h-96"> 
+      <table aria-labelledby="tablaReporteExcel" aria-describedby="tablaReporteCupos" class="w-full whitespace-nowrap text-left">
+        <colgroup>
+          <col class="w-full sm:w-4/12">
+          <col class="lg:w-4/12">
+          <col class="lg:w-2/12">
+          <col class="lg:w-1/12">
+          <col class="lg:w-1/12">
+        </colgroup>
+        <thead class="border-b border-white/10 text-sm leading-6 text-white">
+          <tr>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Código Proyecto</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Nombre</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Tipo Proyecto</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Tipo Atención</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Duración Restante</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">Cupos</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-10">solicitantes</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Comuna</th>
+            {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
+              <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Acciones</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+
+        {% for project in projects %}
+  
+          <tr>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ project.code }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ project.project_name }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-10">
+              {{ project.tipo_proyecto }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {% if project.type_of_attention %}
+                Recidencial
+              {% else %}
+                Ambulatoria
+              {% endif %}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ project.remaining_months }} meses
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ project.cupos_disponibles }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ project.solicitantes }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+              {{ project.location_FK.commune }}
+            </td>
+            <td class="py-1 pl-0  text-sm leading-6  md:table-cell">
+              <div class="flex gap-2">
+                <a href="{% url 'OnlyProjectExtensionDetail' project.id %}" class="flex w-12 justify-center rounded-md bg-indigo-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">
+                  {% include "components/svg/svg_extender.html" %}
+                </a>
+                {% if user.profile.position_FK.permission_code != "RESTRICTED" %}
+                  <a href="{% url "ProjectEdit" project.id  %}" class="flex projects-center w-12 justify-center rounded-md bg-emerald-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+                    {% include "components/svg/svg_editar.html" %}
+                  </a>
+                  <a href="{% url 'ProjectDelete' project.id %}" onclick="return confirm('¿Estás seguro de que deseas borrar el proyecto {{ project.code }} ?');" class="flex projects-center w-12 justify-center rounded-md bg-red-500 px-3 py-[10px] text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 ">
+                    {% include "components/svg/svg_eliminar.html" %}
+                  </a>
+                {% endif %}
+              </div>
+            </td>
+  
+          </tr>
+      
+        {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+    
+  {% else %}
+    <strong>NO HAY REGISTROS</strong>
+  {% endif %} 
+
+  {% include 'components/paginador.html' %}
+  {% include 'components/mensajes.html' %} 
+
+{% endblock content_main %}
+
+{% block javascript %}
+  <script defer src="{% static "js/show_form.js" %}"></script>
+{% endblock javascript %}

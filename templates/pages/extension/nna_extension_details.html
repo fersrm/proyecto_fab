@@ -1,0 +1,60 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+{% load tailwind_filters %}
+
+{% block content_main %}  
+
+  <div class="flex min-h-full flex-col justify-center sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-[680px]">
+      <div class="bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 px-8 py-12 shadow-xl rounded-2xl sm:px-12">
+        <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">Detalles de la Extensión</h1>
+
+        <div class="space-y-6">
+          <div class="bg-white p-4 rounded-lg shadow-md">
+            <div class="font-medium text-gray-800 text-lg">Motivo:</div>
+            <div class="text-zinc-600">{{ nna_extension.reason }}</div>
+          </div>
+
+          <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-md">
+            <span class="font-medium text-gray-800 text-lg">Fecha Solicitud:</span>
+            <span class="text-zinc-600">{{ nna_extension.date }}</span>
+          </div>
+
+          <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-md">
+            <span class="font-medium text-gray-800 text-lg">Estado:</span>
+            {% if nna_extension.approved %}
+              <span class="text-green-600">APROBADO</span>
+            {% else %}
+              <span class="text-amber-500">EN ESPERA</span>
+            {% endif %}
+          </div>
+
+          <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-md">
+            <span class="font-medium text-gray-800 text-lg">NNA:</span>
+            <span class="text-zinc-600">{{ nna_extension.nna_FK }}</span>
+          </div>
+
+          <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-md">
+            <span class="font-medium text-gray-800 text-lg">Proyecto:</span>
+            <span class="text-zinc-600">{{ nna_extension.project_FK }}</span>
+          </div>
+
+          <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-md">
+            <span class="font-medium text-gray-800 text-lg">Usuario que solicitó la extensión:</span>
+            <span class="text-zinc-600">{{ nna_extension.user_FK }}</span>
+          </div>
+
+          {% if nna_extension.approved %}
+            <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-md">
+              <span class="font-medium text-gray-800 text-lg">Usuario que aprobo la extensión:</span>
+              <span class="text-zinc-600">{{ nna_extension.approved_user_FK }}</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include 'components/mensajes.html' %} 
+  
+{% endblock %}

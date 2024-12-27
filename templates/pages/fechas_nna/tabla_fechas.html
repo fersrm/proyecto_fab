@@ -1,0 +1,81 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+
+{% block content_main %} 
+
+  {% if object_list %}
+    <div class="overflow-x-auto min-h-96"> 
+      <table aria-labelledby="tablaFechas" aria-describedby="tablaCalculoEstadia" class="w-full whitespace-nowrap text-left">
+        <colgroup>
+          <col class="w-full sm:w-4/12">
+          <col class="lg:w-4/12">
+          <col class="lg:w-2/12">
+          <col class="lg:w-1/12">
+          <col class="lg:w-1/12">
+        </colgroup>
+        <thead class="border-b border-white/10 text-sm leading-6 text-white">
+          <tr>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-5">Código NNA</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-5">RUT</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-5">Nombre</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-5">Comuna</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-5">Total Días</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-5">Tiempo Aproximado</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-5">Último Proyecto</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-5">Última Fecha</th>
+            <th scope="col" class=" py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-5">Vigencia</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+
+        {% for item in object_list %}
+  
+          <tr>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-5">
+              {{ item.cod_nna }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-5">
+              {{ item.person_FK.rut }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-5">
+              {{ item.person_FK.name }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-5">
+              {{ item.location_FK.commune }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-5">
+              {{ item.duracion_total_dias }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-5">
+              {{ item.tiempo_aproximado }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-5">
+              {{ item.ultimo_proyecto }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-5">
+              {{ item.ultima_fecha }}
+            </td>
+            <td class=" py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-5">
+              {% if item.vigente %}
+                Activo
+              {% else %}
+                De alta
+              {% endif %}
+            </td>
+          </tr>
+      
+        {% endfor %}
+
+        </tbody>
+      </table>
+    </div> 
+
+  {% else %}
+    <strong>NO HAY REGISTROS</strong>
+  {% endif %}
+
+  {% include 'components/paginador.html' %}
+  
+  {% include 'components/mensajes.html' %}  
+
+{% endblock content_main %}

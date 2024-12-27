@@ -1,0 +1,24 @@
+
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+{% load tailwind_filters %}
+
+{% block content_main %}  
+
+  <div class="flex min-h-full flex-col justify-center sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-[680px]">
+      <div class="bg-white px-6 py-10 shadow rounded-lg sm:px-12">
+
+        <form method="POST">
+          {% csrf_token %}
+          {{ form|crispy }}
+          {% include "components/btn/button.html" with button_text="Extender" %}
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  {% include 'components/mensajes.html' %} 
+  
+{% endblock %}

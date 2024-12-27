@@ -1,0 +1,46 @@
+{% extends 'components/Layout/base_extendido.html' %}
+{% load static %}   
+
+{% block content_main %}  
+
+  <div class="flex flex-col gap-3 mb-5">
+    <h2 class="text-2xl font-medium text-gray-200 text-center">Historial de cambios para {{ solicitante_name }}</h2>
+      <div class="flex min-h-full flex-col justify-center sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-[730px]">
+        
+          {% if history_by_nna_entrante %}
+            {% for tipo_proyecto, history_entries in history_by_nna_entrante.items %}
+              <div class="bg-white shadow-lg rounded-lg p-8 mt-6">
+                <h4 class="text-2xl font-semibold text-gray-800 border-b pb-4 mb-6">
+                    Tipo de Proyecto: <span class="text-indigo-600">{{ tipo_proyecto }}</span>
+                </h4>
+                <ul class="space-y-4">
+                    {% for entry in history_entries %}
+                        <li class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div class="text-sm text-gray-600">
+                                <span class="font-medium text-gray-800">Fecha anterior:</span> {{ entry.old_date|date }}
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <span class="font-medium text-gray-800">Fecha de cambio:</span> {{ entry.changed_date|date }}
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <span class="font-medium text-gray-800">Prioridad:</span> 
+                                <span class="text-yellow-500">{{ entry.old_priority }}</span> →
+                                <span class="text-green-500">{{ entry.new_priority }}</span>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+              </div>
+            {% endfor %}
+          {% else %}
+            <strong>No hay historial de cambios disponible para este solicitante.</strong>
+          {% endif %}
+
+          {% include 'components/mensajes.html' %}  
+        </div>
+      </div>
+  </div>
+        
+{% endblock %}
+

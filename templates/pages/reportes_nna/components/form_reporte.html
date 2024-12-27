@@ -1,0 +1,43 @@
+<form method="POST" action="{% url 'GeneratePdf' item.id %}" class="w-56 shrink rounded-xl bg-white p-4 text-sm font-semibold leading-6 text-gray-900 shadow-lg ring-1 ring-gray-900/5">
+  {% csrf_token %}
+  <p class="text-gray-500">Marque lo que necesite:</p>
+
+  <div class="relative flex gap-x-3">
+    <div class="flex h-6 items-center">
+      <input id="personal" name="info" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" value="personal">
+    </div>
+    <div class="text-sm leading-6">
+      <label for="personal" class="font-medium text-gray-900">Personal</label>
+    </div>
+  </div>
+
+  <div class="relative flex gap-x-3">
+    <div class="flex h-6 items-center">
+      <input id="ubicacion" name="info" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" value="ubicacion">
+    </div>
+    <div class="text-sm leading-6">
+      <label for="ubicacion" class="font-medium text-gray-900">Ubicación</label>
+    </div>
+  </div>
+
+  <div class="relative flex gap-x-3">
+    <div class="flex h-6 items-center">
+      <input id="proyecto" name="info" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" value="proyecto">
+    </div>
+    <div class="text-sm leading-6">
+      <label for="proyecto" class="font-medium text-gray-900">Proyecto</label>
+    </div>
+  </div>
+
+  <div class="relative flex gap-x-3">
+    <div class="flex h-6 items-center">
+      <input id="legal" name="info" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" value="legal">
+    </div>
+    <div class="text-sm leading-6">
+      <label for="legal" class="font-medium text-gray-900">Legal</label>
+    </div>
+  </div>
+  
+  {% include "components/btn/button.html" with button_id="uploadButton" button_text="Descargar PDF" button_class="mt-4" %} 
+  
+</form>
